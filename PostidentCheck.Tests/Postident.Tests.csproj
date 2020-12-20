@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>Postident.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Divergic.Logging.Xunit" Version="3.6.0" />
+    <PackageReference Include="JustEat.HttpClientInterception" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+    <PackageReference Include="Moq" Version="4.15.2" />
+    <PackageReference Include="Moq.AutoMock" Version="2.3.0" />
+    <PackageReference Include="Moq.Contrib.ExpressionBuilders.Logging" Version="1.0.6" />
+    <PackageReference Include="Moq.EntityFrameworkCore" Version="5.0.0.1" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Integration tests\Fixtures\InMemoryDbContent.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Integration tests\Infrastructure\DHL\" />
+    <Folder Include="Unit tests\Application\Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PostidentCheck.Application\Postident.Application.csproj" />
+    <ProjectReference Include="..\PostidentCheck.Core\Postident.Core.csproj" />
+    <ProjectReference Include="..\PostidentCheck.Infrastructure\Postident.Infrastructure.csproj" />
+    <ProjectReference Include="..\PostidentCheck\PostidentCheck.csproj" />
+  </ItemGroup>
+
+</Project>
