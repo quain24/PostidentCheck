@@ -12,7 +12,7 @@ namespace Postident.Tests.Integration_tests.Fixtures
         {
         }
 
-        public DbSet<DataPack> Parcels { get; set; }
+        public DbSet<DataPackReadModel> Parcels { get; set; }
 
         public Task<int> SaveChangesAsync()
         {

@@ -12,7 +12,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
     public class ParcelValidatorTests
     {
         private readonly ITestOutputHelper _output;
-        private readonly IValidator<DataPack> _validator = new ParcelValidator();
+        private readonly IValidator<DataPackReadModel> _validator = new ParcelValidator();
 
         public ParcelValidatorTests(ITestOutputHelper output)
         {
@@ -32,7 +32,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
         [Fact]
         public void Will_not_validate_if_checking_null()
         {
-            var result = _validator.Validate(null as DataPack);
+            var result = _validator.Validate(null as DataPackReadModel);
 
             Assert.False(result.IsValid);
         }

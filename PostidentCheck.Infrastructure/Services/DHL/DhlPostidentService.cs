@@ -8,6 +8,8 @@ using Postident.Core.Entities;
 using Postident.Infrastructure.Interfaces.DHL;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -16,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Postident.Infrastructure.Services.DHL
 {
-    public class DhlPostidentService : ApiServiceBase<DhlResponseDto, DataPack>, IDhlApiService
+    public class DhlPostidentService : ApiServiceBase<DhlResponseDto, DataPackReadModel>, IDhlApiService
     {
         private const string ServiceName = "DHL PostIdent";
 
@@ -25,7 +27,7 @@ namespace Postident.Infrastructure.Services.DHL
 
         public DhlPostidentService(IHttpClientFactory httpFactory,
             ICarrierApiServiceResponseDeserializer<DhlResponseDto> serializer,
-            IValidator<DataPack> parcelValidator,
+            IValidator<DataPackReadModel> parcelValidator,
             ILogger<DhlPostidentService> logger,
             IDhlSettings configuration)
         : base(ServiceName, serializer, parcelValidator, logger)
@@ -58,7 +60,7 @@ namespace Postident.Infrastructure.Services.DHL
             }
         }
 
-        protected override async Task<IEnumerable<HttpRequestMessage>> GenerateRequestsFrom(IEnumerable<DataPack> dataPacks, CancellationToken ct)
+        protected override async Task<IEnumerable<HttpRequestMessage>> GenerateRequestsFrom(IEnumerable<DataPackReadModel> dataPacks, CancellationToken ct)
         {
             var xmlSecret = await RetrieveXmlAuthorizationData(ct);
             throw new NotImplementedException();
@@ -70,6 +72,12 @@ namespace Postident.Infrastructure.Services.DHL
             //_logger.LogInformation("{0}: Generating {1} requests from {2} parcels.", ServiceName, output.Count, parcels.Count());
 
             //return await Task.FromResult(output);
+        }
+
+        protected override Task<IEnumerable<HttpResponseMessage>> GetOnlyDeserializableResponses(IEnumerable<HttpResponseMessage> responses)
+        {
+            // Internal service errors from DHL also can be deserialized
+            return Task.FromResult(responses.Where(r => r.IsSuccessStatusCode || r.StatusCode == HttpStatusCode.InternalServerError));
         }
 
         private Task<Secret> RetrieveXmlAuthorizationData(CancellationToken ct) => _configuration.XmlSecret(ct);

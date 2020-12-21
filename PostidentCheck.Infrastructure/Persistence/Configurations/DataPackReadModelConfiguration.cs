@@ -4,13 +4,14 @@ using Postident.Core.Entities;
 
 namespace Postident.Infrastructure.Persistence.Configurations
 {
-    internal class DataPackConfiguration : IEntityTypeConfiguration<DataPack>
+    internal class DataPackReadModelConfiguration : IEntityTypeConfiguration<DataPackReadModel>
     {
-        public void Configure(EntityTypeBuilder<DataPack> builder)
+        public void Configure(EntityTypeBuilder<DataPackReadModel> builder)
         {
             // todo Table / view must have some sort of key!! Add additional column with unique key.
             //builder.HasKey(e => e.ParcelId);
-            builder.ToTable("GetPostidentsToCheck");
+
+            builder.ToView("GetPostidentsToCheck");
 
             builder.Property(e => e.City).HasColumnName("city");
             builder.Property(e => e.Street).HasColumnName("street");

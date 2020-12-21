@@ -39,7 +39,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures.Object
             return this;
         }
 
-        public DhlApiQueryFixtureModel AddParcelTrackingNumbers(IEnumerable<DataPack> parcels)
+        public DhlApiQueryFixtureModel AddParcelTrackingNumbers(IEnumerable<DataPackReadModel> parcels)
         {
             foreach (var parcel in parcels)
             {

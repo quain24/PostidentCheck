@@ -18,12 +18,12 @@ namespace Postident.Application.DHL.Commands
 
     public class DhlUpdateParcelStatusesHandler : IRequestHandler<DhlUpdateParcelStatusesCommand, bool>
     {
-        private readonly IDataPackRepository _repository;
+        private readonly IDataPackReadRepository _repository;
         private readonly IDhlApiService _apiService;
         private readonly IValidator<DhlResponseDto> _dhlResponseValidator;
         private readonly ILogger<DhlUpdateParcelStatusesHandler> _logger;
 
-        public DhlUpdateParcelStatusesHandler(IDataPackRepository repository,
+        public DhlUpdateParcelStatusesHandler(IDataPackReadRepository repository,
             IDhlApiService apiService,
             IValidator<DhlResponseDto> dhlResponseValidator,
             ILogger<DhlUpdateParcelStatusesHandler> logger)
@@ -51,16 +51,16 @@ namespace Postident.Application.DHL.Commands
             return await UpdateDatabase();
         }
 
-        private async Task<List<DataPack>> RetrieveParcelsFromDatabase(CancellationToken token)
+        private async Task<List<DataPackReadModel>> RetrieveParcelsFromDatabase(CancellationToken token)
         {
             try
             {
-                return await Task.FromResult(new List<DataPack>()); //await _repository.GetParcelsSentBy(new[] { Carrier.DHL, Carrier.DHL_Sperr }, token);
+                return await Task.FromResult(new List<DataPackReadModel>()); //await _repository.GetParcelsSentBy(new[] { Carrier.DHL, Carrier.DHL_Sperr }, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{0}: Could not get data from database, exception has occurred - ending command", nameof(Carrier.DHL));
-                return new List<DataPack>();
+                return new List<DataPackReadModel>();
             }
         }
 
@@ -76,7 +76,8 @@ namespace Postident.Application.DHL.Commands
         {
             try
             {
-                var updatedParcelsAmount = await _repository.UpdateDataPacksTableAsync();
+                // todo actual save implementation in save repository
+                var updatedParcelsAmount = 0;//await _repository.UpdateDataPacksTableAsync();
                 if (updatedParcelsAmount > 0)
                     _logger.LogInformation("{0}: Database updated successfully, updated {1} parcel(s).", nameof(Carrier.DHL), updatedParcelsAmount);
                 else

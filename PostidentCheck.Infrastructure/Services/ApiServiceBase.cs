@@ -13,6 +13,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Postident.Application.Common;
 
 namespace Postident.Infrastructure.Services
 {
@@ -35,7 +36,7 @@ namespace Postident.Infrastructure.Services
         /// </summary>
         /// <param name="serviceName">Name of a carrier to which this API connects - used in logging</param>
         /// <param name="deserializer">Object used to deserialize API responses (<see cref="HttpResponseMessage"/>) into chosen <typeparamref name="TResponseDTO"/> type</param>
-        /// <param name="dataPackValidator">Validates <see cref="DataPack"/> objects, which data will be used to create API queries</param>
+        /// <param name="dataPackValidator">Validates <see cref="DataPackReadModel"/> objects, which data will be used to create API queries</param>
         /// <param name="logger">Used to log any errors, optional</param>
         protected ApiServiceBase(string serviceName, ICarrierApiServiceResponseDeserializer<TResponseDTO> deserializer, IValidator<TQueriedDataType> dataPackValidator, ILogger logger)
         {
@@ -59,7 +60,7 @@ namespace Postident.Infrastructure.Services
         /// Queries API service for data taken from <paramref name="dataPacks"/>. Does validate given <paramref name="dataPacks"/> and processes only good ones.
         /// Queries API in set intervals (<seealso cref="QueriesPerSecond"/>). Can be cancelled using with <paramref name="token"/>
         /// </summary>
-        /// <param name="dataPacks">Collection of <see cref="DataPack"/> to ask API about</param>
+        /// <param name="dataPacks">Collection of <see cref="DataPackReadModel"/> to ask API about</param>
         /// <param name="token">API query can be cancelled with this token</param>
         /// <returns>Collection of <typeparamref name="TResponseDTO"></typeparamref> from API</returns>
         public async Task<IEnumerable<TResponseDTO>> GetResponsesFromApiAsync(
@@ -122,6 +123,7 @@ namespace Postident.Infrastructure.Services
         /// <br/>Every API can have different methods, different type of requests, so this method does not have base implementation
         /// </summary>
         /// <param name="dataPacks">Source data to generate <see cref="HttpRequestMessage"/> objects from</param>
+        /// <param name="token">Cancellation token</param>
         /// <returns>A collection of request to be send</returns>
         protected abstract Task<IEnumerable<HttpRequestMessage>> GenerateRequestsFrom(IEnumerable<TQueriedDataType> dataPacks, CancellationToken token);
 
@@ -164,7 +166,7 @@ namespace Postident.Infrastructure.Services
                 _logger?.LogWarning(
                     "{0} HTTP Client timeout - tried to get {1} responses, got {2}." +
                     " Received responses will be processed\nexception data: {3}"
-                    , _serviceName, requests.Count(), (await GetOnlyOkResponses(responses)).Count(), ex.Message);
+                    , _serviceName, requests.Count(), (await GetOnlyDeserializableResponses(responses)).Count(), ex.Message);
             }
             catch (BrokenCircuitException)
             {
@@ -172,7 +174,7 @@ namespace Postident.Infrastructure.Services
                                    " - already received data will be processed.", _serviceName);
             }
 
-            var okResponses = (await GetOnlyOkResponses(responses)).ToList();
+            var okResponses = (await GetOnlyDeserializableResponses(responses)).ToList();
 
             _logger?.LogInformation("{0}: Api call finished, {1}/{2} responses were proper and therefore sent for deserialization"
                 , _serviceName, okResponses.Count, requests.Count());
@@ -185,7 +187,7 @@ namespace Postident.Infrastructure.Services
         /// </summary>
         /// <param name="responses">Collection of <see cref="HttpResponseMessage"/> from API service</param>
         /// <returns>Collection of <see cref="HttpResponseMessage"/> for deserialization</returns>
-        protected virtual Task<IEnumerable<HttpResponseMessage>> GetOnlyOkResponses(IEnumerable<HttpResponseMessage> responses) =>
+        protected virtual Task<IEnumerable<HttpResponseMessage>> GetOnlyDeserializableResponses(IEnumerable<HttpResponseMessage> responses) =>
             Task.FromResult(responses.Where(r => r.IsSuccessStatusCode));
 
         /// <summary>

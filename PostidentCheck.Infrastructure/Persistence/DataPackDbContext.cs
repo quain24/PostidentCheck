@@ -11,7 +11,7 @@ namespace Postident.Infrastructure.Persistence
         {
         }
 
-        public DbSet<DataPack> DataPacks { get; set; }
+        public DbSet<DataPackReadModel> DataPacks { get; set; }
 
         public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 

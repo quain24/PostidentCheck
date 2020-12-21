@@ -43,7 +43,7 @@ namespace Postident.Infrastructure.Installers
                 .AddPolicyHandler(HttpClientPolicies.CircuitBreakerAsyncOneTimePolicy(serviceName, 10)); // actual attempts * how many messages can fail without a good between one between
 
             services.AddTransient<IDhlApiService, DhlPostidentService>();
-            services.AddTransient<ICarrierApiServiceResponseDeserializer<DhlResponseDto>, DhlResponseDeserializer>
+            services.AddTransient<ICarrierApiServiceResponseDeserializer<DhlMainResponseDto>, DhlResponseDeserializer>
             (srv => new DhlResponseDeserializer(serviceName, srv.GetRequiredService<ILogger<DhlResponseDeserializer>>()));
 
             return services;

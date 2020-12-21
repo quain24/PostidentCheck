@@ -1,6 +1,6 @@
 ﻿namespace Postident.Core.Entities
 {
-    public class DataPack
+    public class DataPackReadModel
     {
         public string PostIdent { get; set; }
         public string Street { get; set; }

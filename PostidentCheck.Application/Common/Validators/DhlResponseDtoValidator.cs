@@ -21,10 +21,10 @@ namespace Postident.Application.Common.Validators
                 .OnFailure(d => logger?.LogError(string.Format(KeyErrorMsg, nameof(d.Key))))
                 .WithMessage(d => string.Format(KeyErrorMsg, nameof(d.Key)));
 
-            RuleFor(d => d.MainFaultCode)
+            RuleFor(d => d.ErrorCode)
                 .NotEmpty()
-                .OnFailure(d => logger?.LogError(string.Format(MainFaultCodeErrorMsg, nameof(d.MainFaultCode))))
-                .WithMessage(d => string.Format(MainFaultCodeErrorMsg, nameof(d.MainFaultCode)));
+                .OnFailure(d => logger?.LogError(string.Format(MainFaultCodeErrorMsg, nameof(d.ErrorCode))))
+                .WithMessage(d => string.Format(MainFaultCodeErrorMsg, nameof(d.ErrorCode)));
         }
 
         protected override bool PreValidate(ValidationContext<DhlResponseDto> context, ValidationResult result)

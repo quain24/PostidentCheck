@@ -11,11 +11,7 @@ namespace Postident.Application.DHL
         /// A key corresponding to main index of entity that will be used with it main index.
         /// </summary>
         public string Key { get; init; } = string.Empty;
-
-        public string MainFaultCode { get; init; } = string.Empty;
-
-        public string MainFaultText { get; init; } = string.Empty;
-
+        
         public string ErrorCode { get; init; } = string.Empty;
 
         public string ErrorText { get; init; } = string.Empty;
@@ -24,12 +20,11 @@ namespace Postident.Application.DHL
 
         public override string ToString()
         {
-            return $"Main fault code: {ValueOrFiller(MainFaultCode)} | Main fault text: {ValueOrFiller(MainFaultText)} | Error code: {ValueOrFiller(ErrorCode)} | " +
-                   $"Error text: {ValueOrFiller(ErrorText)} | Status messages: {ValueOrFiller(StatusMessages)}";
+            return $"Error code: {ValueOrFiller(ErrorCode)} | " + $"Error text: {ValueOrFiller(ErrorText)} | Status messages: {ValueOrFiller(StatusMessages)}";
         }
 
         private static string ValueOrFiller(string value) => string.IsNullOrWhiteSpace(value) ? "---" : value;
 
-        private string ValueOrFiller(ImmutableHashSet<string> values) => StatusMessages.IsEmpty ? "---" : string.Join(", ", StatusMessages);
+        private string ValueOrFiller(ImmutableHashSet<string> values) => StatusMessages.IsEmpty ? "---" : string.Join(" & ", values);
     }
 }

@@ -4,9 +4,9 @@ using Postident.Core.Entities;
 
 namespace Postident.Application.Common.Validators
 {
-    public class DataPackValidator : AbstractValidator<DataPack>
+    public class DataPackReadModelValidator : AbstractValidator<DataPackReadModel>
     {
-        public DataPackValidator()
+        public DataPackReadModelValidator()
         {
             RuleFor(d => d.PostIdent)
                 .NotEmpty()
@@ -27,11 +27,11 @@ namespace Postident.Application.Common.Validators
                 .NotEmpty();
         }
 
-        protected override bool PreValidate(ValidationContext<DataPack> context, ValidationResult result)
+        protected override bool PreValidate(ValidationContext<DataPackReadModel> context, ValidationResult result)
         {
             if (context.InstanceToValidate == null)
             {
-                result.Errors.Add(new ValidationFailure("", $"Given {nameof(DataPack)} was NULL."));
+                result.Errors.Add(new ValidationFailure("", $"Given {nameof(DataPackReadModel)} was NULL."));
                 return false;
             }
             return true;

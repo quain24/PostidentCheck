@@ -11,11 +11,11 @@ namespace Postident.Tests.Integration_tests.Fixtures
 {
     public class DatabaseFixture
     {
-        private static List<DataPack> ParcelSeedData;
+        private static List<DataPackReadModel> ParcelSeedData;
 
-        private static Func<List<DataPack>> GetParcels = PopulateParcelSeedData;
+        private static Func<List<DataPackReadModel>> GetParcels = PopulateParcelSeedData;
 
-        private static List<DataPack> PopulateParcelSeedData()
+        private static List<DataPackReadModel> PopulateParcelSeedData()
         {
             if (ParcelSeedData != null)
                 return ParcelSeedData;
@@ -28,7 +28,7 @@ namespace Postident.Tests.Integration_tests.Fixtures
                 JsonSerializer.Deserialize<List<ParcelJsonCompatibleModel>>(File.ReadAllText(fileLocalization +
                     "\\Integration tests\\Fixtures\\InMemoryDbContent.json"));
 
-            ParcelSeedData = parcelSeedDataJsonModel.Select(p => new DataPack()
+            ParcelSeedData = parcelSeedDataJsonModel.Select(p => new DataPackReadModel()
             {
                 CarrierId = p.carrier,
                 ParcelId = p.parcelId,
@@ -40,11 +40,11 @@ namespace Postident.Tests.Integration_tests.Fixtures
             return ParcelSeedData;
         }
 
-        private static List<DataPack> CloneParcelDataSeed()
+        private static List<DataPackReadModel> CloneParcelDataSeed()
         {
             return ParcelSeedData.Select(p =>
             {
-                return new DataPack()
+                return new DataPackReadModel()
                 {
                     CarrierId = p.CarrierId,
                     TrackingNumber = p.TrackingNumber,
