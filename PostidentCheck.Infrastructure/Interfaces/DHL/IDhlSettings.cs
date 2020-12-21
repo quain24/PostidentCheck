@@ -19,5 +19,10 @@ namespace Postident.Infrastructure.Interfaces.DHL
         /// <returns><see cref="Secret"/> containing username and password for dhl xml request generation</returns>
         /// <exception cref="System.OperationCanceledException()"></exception>
         Task<Secret> XmlSecret(CancellationToken ct);
+
+        /// <summary>
+        /// How many parcel tracking numbers ca be sent to api in a single request - maximum 20
+        /// </summary>
+        int MaxValidationsInQuery { get; set; }
     }
 }

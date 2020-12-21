@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using SharedExtensions;
+using System.Collections.Immutable;
 
 namespace Postident.Application.DHL
 {
@@ -11,7 +12,7 @@ namespace Postident.Application.DHL
         /// A key corresponding to main index of entity that will be used with it main index.
         /// </summary>
         public string Key { get; init; } = string.Empty;
-        
+
         public string ErrorCode { get; init; } = string.Empty;
 
         public string ErrorText { get; init; } = string.Empty;
@@ -20,11 +21,11 @@ namespace Postident.Application.DHL
 
         public override string ToString()
         {
-            return $"Error code: {ValueOrFiller(ErrorCode)} | " + $"Error text: {ValueOrFiller(ErrorText)} | Status messages: {ValueOrFiller(StatusMessages)}";
+            return $"Error code: {ValueOrFiller(ErrorCode)} | " + $"Error text: {ValueOrFiller(ErrorText)} | Status messages(s): {ValueOrFiller(StatusMessages)}";
         }
 
         private static string ValueOrFiller(string value) => string.IsNullOrWhiteSpace(value) ? "---" : value;
 
-        private string ValueOrFiller(ImmutableHashSet<string> values) => StatusMessages.IsEmpty ? "---" : string.Join(" & ", values);
+        private static string ValueOrFiller(ImmutableHashSet<string> values) => values.IsNullOrEmpty() ? "---" : string.Join(" & ", values);
     }
 }

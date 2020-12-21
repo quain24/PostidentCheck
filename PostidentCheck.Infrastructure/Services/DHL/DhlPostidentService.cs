@@ -6,6 +6,7 @@ using Postident.Application.DHL;
 using Postident.Application.DHL.Interfaces;
 using Postident.Core.Entities;
 using Postident.Infrastructure.Interfaces.DHL;
+using SharedExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,15 +64,20 @@ namespace Postident.Infrastructure.Services.DHL
         protected override async Task<IEnumerable<HttpRequestMessage>> GenerateRequestsFrom(IEnumerable<DataPackReadModel> dataPacks, CancellationToken ct)
         {
             var xmlSecret = await RetrieveXmlAuthorizationData(ct);
+
+            var output = dataPacks
+                .Batch(_configuration.MaxValidationsInQuery)
+                .Select(batch => CreateCombinedRequestFrom(batch, xmlSecret))
+                .ToList();
+
+            _logger.LogInformation("{0}: Generating {1} requests from {2} data packs.", ServiceName, output.Count, dataPacks.Count());
+
+            return await Task.FromResult(output);
+        }
+
+        private HttpRequestMessage CreateCombinedRequestFrom(IEnumerable<DataPackReadModel> dataPacks, Secret secret)
+        {
             throw new NotImplementedException();
-            //var output = parcels
-            //    .Batch(_configuration.MaxParcelNumbersInQuery)
-            //    .Select(batch => CreateCombinedRequestFrom(batch, xmlSecret))
-            //    .ToList();
-
-            //_logger.LogInformation("{0}: Generating {1} requests from {2} parcels.", ServiceName, output.Count, parcels.Count());
-
-            //return await Task.FromResult(output);
         }
 
         protected override Task<IEnumerable<HttpResponseMessage>> GetOnlyDeserializableResponses(IEnumerable<HttpResponseMessage> responses)

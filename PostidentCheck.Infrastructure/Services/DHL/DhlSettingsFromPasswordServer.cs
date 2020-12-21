@@ -30,7 +30,7 @@ namespace Postident.Infrastructure.Services.DHL
             AssignSettings(settings);
         }
 
-        private void CheckSettings(DhlSettingsFromAppsettings settings)
+        private static void CheckSettings(DhlSettingsFromAppsettings settings)
         {
             _ = settings ?? throw new ArgumentNullException(nameof(settings), "Missing proper instance of settings - could not setup necessary settings.");
 
@@ -71,6 +71,11 @@ namespace Postident.Infrastructure.Services.DHL
         /// <inheritdoc cref="ICarrierServiceSettings.BaseAddress"/>
         /// </summary>
         public string BaseAddress { get; set; }
+
+        /// <summary>
+        /// <inheritdoc cref="IDhlSettings.MaxValidationsInQuery"/>
+        /// </summary>
+        public int MaxValidationsInQuery { get; set; }
 
         /// <summary>
         /// <inheritdoc cref="ICarrierServiceSettings.MaxQueriesPerSecond"/>
