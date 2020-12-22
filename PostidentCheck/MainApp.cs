@@ -20,7 +20,6 @@ namespace PostidentCheck
         {
             //await _mediator.Send(new DhlUpdateParcelStatusesCommand());
             await _test.test();
-            await _test.testNew();
             System.Console.WriteLine("FINISHED");
         }
     }

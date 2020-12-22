@@ -1,0 +1,20 @@
+{
+  "DefaultShipmentValues": {
+    "ServiceType": "V01PAK",
+    "AccountNumber": "62203625500104",
+
+    "ShipmentWeight": 5,
+    "ShipmentLength": 10,
+    "ShipmentWidth": 10,
+    "ShipmentHeight": 10,
+
+    "ReceiverName": "Name",
+
+    "SenderName": "Raumschmiede",
+    "SenderStreet": "Lange Gwand",
+    "SenderStreetNumber": "1",
+    "SenderCity": "Genderkingen",
+    "SenderZipCode": "86682",
+    "SenderCountryCode": "DE"
+  }
+}
