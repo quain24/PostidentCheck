@@ -6,12 +6,12 @@ using System.Xml.Linq;
 
 namespace Postident.Infrastructure.Services.DHL
 {
-    public class ShipmentBuilder
+    public class SingleShipmentBuilder
     {
-        private readonly ValidationXmlRequestBuilder _parentBuilder;
+        private readonly ValidationRequestXmlBuilder _parentBuilder;
         private const string NotImplementedDeutschePostEndpointMsg = "Given endpoint has not been implemented in this object, cannot set up receiver data.";
 
-        public ShipmentBuilder(XNamespace cisNamespace, ValidationXmlRequestBuilder parentBuilder, List<XElement> shipments)
+        public SingleShipmentBuilder(XNamespace cisNamespace, ValidationRequestXmlBuilder parentBuilder, List<XElement> shipments)
         {
             _parentBuilder = parentBuilder;
             CisNamespace = cisNamespace;
@@ -33,7 +33,7 @@ namespace Postident.Infrastructure.Services.DHL
         /// <paramref name="id"/> has to correspond to key column of data packs being checked.
         /// </summary>
         /// <param name="id">A key value from data being checked, unique</param>
-        public ShipmentBuilder SetUpId(string id)
+        public SingleShipmentBuilder SetUpId(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentOutOfRangeException(nameof(id),
@@ -43,7 +43,7 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public ShipmentBuilder SetUpDhlServiceType(string type)
+        public SingleShipmentBuilder SetUpDhlServiceType(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
                 throw new ArgumentOutOfRangeException(nameof(type),
@@ -57,7 +57,7 @@ namespace Postident.Infrastructure.Services.DHL
         /// Theoretical shipping date - should be set to 'today' or a date in near future.
         /// </summary>
         /// <param name="date">Ship-out date of this shipment</param>
-        public ShipmentBuilder SetUpShippingDate(DateTime date)
+        public SingleShipmentBuilder SetUpShippingDate(DateTime date)
         {
             if (date.Date < DateTime.Today)
                 throw new ArgumentOutOfRangeException(nameof(date),
@@ -72,7 +72,7 @@ namespace Postident.Infrastructure.Services.DHL
         /// Set up shippers account number.
         /// </summary>
         /// <param name="accountNumber">Shippers account number</param>
-        public ShipmentBuilder SetUpAccountNumber(string accountNumber)
+        public SingleShipmentBuilder SetUpAccountNumber(string accountNumber)
         {
             if (string.IsNullOrWhiteSpace(accountNumber))
                 throw new ArgumentOutOfRangeException(nameof(accountNumber), "Account number cannot be null or empty.");
@@ -86,7 +86,7 @@ namespace Postident.Infrastructure.Services.DHL
         /// Set up senders address and name data
         /// </summary>
         /// <param name="address"><see cref="Address"/> object containing senders address and naming data</param>
-        public ShipmentBuilder SetUpSenderData(Address address)
+        public SingleShipmentBuilder SetUpSenderData(Address address)
         {
             SenderData = AddressGenerator(address, "Shipper");
             return this;
@@ -96,7 +96,7 @@ namespace Postident.Infrastructure.Services.DHL
         /// Set up receiver address and name data - MANDATORY
         /// </summary>
         /// <param name="address"><see cref="Address"/> object containing receivers address and naming data</param>
-        public ShipmentBuilder SetUpReceiverData(Address address)
+        public SingleShipmentBuilder SetUpReceiverData(Address address)
         {
             _ = address ?? throw new ArgumentNullException(nameof(address));
 
@@ -163,7 +163,7 @@ namespace Postident.Infrastructure.Services.DHL
             );
         }
 
-        public ShipmentBuilder SetUpItemDimensions(uint weightInKg, uint lengthInCm, uint widthInCm,
+        public SingleShipmentBuilder SetUpItemDimensions(uint weightInKg, uint lengthInCm, uint widthInCm,
             uint heightInCm)
         {
             CheckDimensions(weightInKg, lengthInCm, widthInCm, heightInCm);
@@ -190,7 +190,7 @@ namespace Postident.Infrastructure.Services.DHL
             if (!string.IsNullOrEmpty(name)) throw new ArgumentNullException(name, $"Given {name} is 0. Every dimension must be a positive number!");
         }
 
-        public ShipmentBuilder Reset()
+        public SingleShipmentBuilder Reset()
         {
             Id = null;
             ReceiverData = null;
@@ -203,12 +203,12 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public ValidationXmlRequestBuilder BuildShipment()
+        public ValidationRequestXmlBuilder BuildShipment()
         {
             if (Id is null)
-                throw new MissingFieldException(nameof(ShipmentBuilder), nameof(Id));
+                throw new MissingFieldException(nameof(SingleShipmentBuilder), nameof(Id));
             if (ReceiverData is null)
-                throw new MissingFieldException(nameof(ShipmentBuilder), nameof(ReceiverData));
+                throw new MissingFieldException(nameof(SingleShipmentBuilder), nameof(ReceiverData));
 
             if (SenderData is null)
             {

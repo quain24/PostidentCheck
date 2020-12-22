@@ -23,6 +23,17 @@ namespace Postident.Infrastructure.Installers
                     }));//,
                         //ServiceLifetime.Transient);
 
+            services.AddDbContext<IInfoPackDbContext, InfoPackDbContext>(options =>
+                options.UseSqlServer(
+                    connectionString,
+                    sqlServerOptionsAction: sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorNumbersToAdd: null);
+                    }));
+
             services.AddScoped<IDataPackReadRepository, DataPackReadRepository>();
 
             return services;

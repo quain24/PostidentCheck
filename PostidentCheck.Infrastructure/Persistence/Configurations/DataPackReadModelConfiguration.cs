@@ -10,7 +10,7 @@ namespace Postident.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<DataPackReadModel> builder)
         {
-            builder.ToView("GetAddressToCheck");
+            builder.ToView("GetAddressToCheck", "om");
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("orderId");
             builder.Property(e => e.Carrier).HasColumnName("carrier")

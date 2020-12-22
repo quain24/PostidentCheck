@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace Postident.Infrastructure.Services.DHL
 {
-    public class ValidationXmlRequestBuilder
+    public class ValidationRequestXmlBuilder
     {
         private XNamespace SoapEnvNamespace { get; } = "http://schemas.xmlsoap.org/soap/envelope/";
         private XNamespace CisNamespace { get; } = "http://dhl.de/webservice/cisbase";
@@ -15,7 +15,7 @@ namespace Postident.Infrastructure.Services.DHL
         private XElement ApiVersionModule { get; set; }
         private List<XElement> Shipments { get; set; } = new();
 
-        public ValidationXmlRequestBuilder SetUpAuthorization(Secret secret)
+        public ValidationRequestXmlBuilder SetUpAuthorization(Secret secret)
         {
             AuthorizationModule = new XElement(SoapEnvNamespace + "Header",
                 new XElement(CisNamespace + "Authentification",
@@ -26,7 +26,7 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public ValidationXmlRequestBuilder SetUpApiVersion(uint majorRelease = 3, uint minorRelease = 1)
+        public ValidationRequestXmlBuilder SetUpApiVersion(uint majorRelease = 3, uint minorRelease = 1)
         {
             ApiVersionModule = new XElement(NsNamespace + "Version",
                 new XElement("majorRelease", majorRelease),
@@ -36,9 +36,9 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public ShipmentBuilder AddNewShipment() => new(CisNamespace, this, Shipments);
+        public SingleShipmentBuilder AddNewShipment() => new(CisNamespace, this, Shipments);
 
-        public ValidationXmlRequestBuilder Reset()
+        public ValidationRequestXmlBuilder Reset()
         {
             AuthorizationModule = null;
             ApiVersionModule = null;
@@ -50,7 +50,7 @@ namespace Postident.Infrastructure.Services.DHL
         public string Build()
         {
             if (AuthorizationModule is null)
-                throw new MissingFieldException(nameof(ValidationXmlRequestBuilder), nameof(AuthorizationModule));
+                throw new MissingFieldException(nameof(ValidationRequestXmlBuilder), nameof(AuthorizationModule));
             if (ApiVersionModule is null)
                 SetUpApiVersion();
 

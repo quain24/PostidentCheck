@@ -1,4 +1,5 @@
 ﻿using KeePass.Models;
+using Postident.Application.Common.Interfaces;
 using Postident.Infrastructure.Common;
 using Postident.Infrastructure.Services.DHL;
 using System;
@@ -11,6 +12,15 @@ namespace Postident.Infrastructure.Services
 {
     public class TestService
     {
+        private IDataPackReadRepository DataPackRepo { get; }
+        private IInfoPackDbContext InfoPackContext { get; }
+
+        public TestService(IDataPackReadRepository dataPackRepo, IInfoPackDbContext infoPackContext)
+        {
+            DataPackRepo = dataPackRepo;
+            InfoPackContext = infoPackContext;
+        }
+
         public async Task test()
         {
             var client = new HttpClient();
@@ -21,7 +31,7 @@ namespace Postident.Infrastructure.Services
             var byteArray = Encoding.ASCII.GetBytes(string.Join(':', "postident_validator_1", "4H4lnXBqGDS26xrLw4FytmvnzsDTXi"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 
-            var builder = new ValidationXmlRequestBuilder();
+            var builder = new ValidationRequestXmlBuilder();
 
             var requestString = builder.SetUpAuthorization(new Secret()
             {
