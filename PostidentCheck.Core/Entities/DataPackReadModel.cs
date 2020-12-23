@@ -11,6 +11,7 @@ namespace Postident.Core.Entities
         public string ZipCode { get; set; }
         public string City { get; set; }
         public string CountryCode { get; set; }
+
         /// <summary>
         /// -1 - not checked, 0 - checked, contains errors, 1 - valid
         /// </summary>

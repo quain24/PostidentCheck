@@ -1,6 +1,6 @@
-﻿using System;
+﻿using FluentValidation.Results;
+using System;
 using System.Linq;
-using FluentValidation.Results;
 
 namespace Postident.Application.Common.Extensions
 {

@@ -1,6 +1,6 @@
-﻿using System.Threading;
+﻿using KeePass.Models;
+using System.Threading;
 using System.Threading.Tasks;
-using KeePass.Models;
 
 namespace Postident.Infrastructure.Interfaces
 {

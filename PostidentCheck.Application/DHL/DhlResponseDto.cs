@@ -24,6 +24,8 @@ namespace Postident.Application.DHL
             return $"Error code: {ValueOrFiller(ErrorCode)} | " + $"Error text: {ValueOrFiller(ErrorText)} | Status messages(s): {ValueOrFiller(StatusMessages)}";
         }
 
+        public static implicit operator string(DhlResponseDto response) => response.ToString();
+
         private static string ValueOrFiller(string value) => string.IsNullOrWhiteSpace(value) ? "---" : value;
 
         private static string ValueOrFiller(ImmutableHashSet<string> values) => values.IsNullOrEmpty() ? "---" : string.Join(" & ", values);

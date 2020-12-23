@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace Postident.Infrastructure.Services.DHL
 {
-    public class ValidationRequestXmlBuilder
+    public class ValidationRequestXmlBuilder : IValidationRequestXmlBuilder
     {
         private XNamespace SoapEnvNamespace { get; } = "http://schemas.xmlsoap.org/soap/envelope/";
         private XNamespace CisNamespace { get; } = "http://dhl.de/webservice/cisbase";
@@ -15,7 +15,7 @@ namespace Postident.Infrastructure.Services.DHL
         private XElement ApiVersionModule { get; set; }
         private List<XElement> Shipments { get; set; } = new();
 
-        public ValidationRequestXmlBuilder SetUpAuthorization(Secret secret)
+        public IValidationRequestXmlBuilder SetUpAuthorization(Secret secret)
         {
             AuthorizationModule = new XElement(SoapEnvNamespace + "Header",
                 new XElement(CisNamespace + "Authentification",
@@ -26,7 +26,7 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public ValidationRequestXmlBuilder SetUpApiVersion(uint majorRelease = 3, uint minorRelease = 1)
+        public IValidationRequestXmlBuilder SetUpApiVersion(uint majorRelease = 3, uint minorRelease = 1)
         {
             ApiVersionModule = new XElement(NsNamespace + "Version",
                 new XElement("majorRelease", majorRelease),
@@ -36,9 +36,9 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public SingleShipmentBuilder AddNewShipment() => new(CisNamespace, this, Shipments);
+        public ISingleShipmentBuilder AddNewShipment() => new SingleShipmentBuilder(CisNamespace, this, Shipments);
 
-        public ValidationRequestXmlBuilder Reset()
+        public IValidationRequestXmlBuilder Reset()
         {
             AuthorizationModule = null;
             ApiVersionModule = null;
@@ -49,12 +49,12 @@ namespace Postident.Infrastructure.Services.DHL
 
         public string Build()
         {
-            if (AuthorizationModule is null)
-                throw new MissingFieldException(nameof(ValidationRequestXmlBuilder), nameof(AuthorizationModule));
+            CheckValidity();
+
             if (ApiVersionModule is null)
                 SetUpApiVersion();
 
-            XDocument soapRequest = new XDocument(
+            var soapRequest = new XDocument(
                 new XDeclaration("1.0", "UTF-8", "no"),
                 new XElement(SoapEnvNamespace + "Envelope",
                     new XAttribute(XNamespace.Xmlns + "soap", SoapEnvNamespace),
@@ -71,6 +71,15 @@ namespace Postident.Infrastructure.Services.DHL
 
             // DHL specific encoding
             return soapRequest.ToString().Replace(";", "%3B");
+        }
+
+        private void CheckValidity()
+        {
+            if (AuthorizationModule is null)
+                throw new MissingFieldException(nameof(ValidationRequestXmlBuilder), nameof(AuthorizationModule));
+
+            if (Shipments.Count == 0)
+                throw new MissingFieldException(nameof(ValidationRequestXmlBuilder), nameof(Shipments));
         }
     }
 }

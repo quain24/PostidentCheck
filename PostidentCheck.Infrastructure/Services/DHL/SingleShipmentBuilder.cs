@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace Postident.Infrastructure.Services.DHL
 {
-    public class SingleShipmentBuilder
+    public class SingleShipmentBuilder : ISingleShipmentBuilder
     {
         private readonly ValidationRequestXmlBuilder _parentBuilder;
         private const string NotImplementedDeutschePostEndpointMsg = "Given endpoint has not been implemented in this object, cannot set up receiver data.";
@@ -29,11 +29,10 @@ namespace Postident.Infrastructure.Services.DHL
         private XElement ServiceType { get; set; }
 
         /// <summary>
-        /// Set up a unique <paramref name="id"/> that will enable this app to differentiate received responses.<br/>
-        /// <paramref name="id"/> has to correspond to key column of data packs being checked.
+        /// <inheritdoc cref="ISingleShipmentBuilder.SetUpId"/>
         /// </summary>
         /// <param name="id">A key value from data being checked, unique</param>
-        public SingleShipmentBuilder SetUpId(string id)
+        public ISingleShipmentBuilder SetUpId(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentOutOfRangeException(nameof(id),
@@ -43,7 +42,7 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public SingleShipmentBuilder SetUpDhlServiceType(string type)
+        public ISingleShipmentBuilder SetUpDhlServiceType(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
                 throw new ArgumentOutOfRangeException(nameof(type),
@@ -54,10 +53,10 @@ namespace Postident.Infrastructure.Services.DHL
         }
 
         /// <summary>
-        /// Theoretical shipping date - should be set to 'today' or a date in near future.
+        /// /// <inheritdoc cref="ISingleShipmentBuilder.SetUpShippingDate"/>
         /// </summary>
         /// <param name="date">Ship-out date of this shipment</param>
-        public SingleShipmentBuilder SetUpShippingDate(DateTime date)
+        public ISingleShipmentBuilder SetUpShippingDate(DateTime date)
         {
             if (date.Date < DateTime.Today)
                 throw new ArgumentOutOfRangeException(nameof(date),
@@ -69,10 +68,10 @@ namespace Postident.Infrastructure.Services.DHL
         }
 
         /// <summary>
-        /// Set up shippers account number.
+        /// /// <inheritdoc cref="ISingleShipmentBuilder.SetUpAccountNumber"/>
         /// </summary>
         /// <param name="accountNumber">Shippers account number</param>
-        public SingleShipmentBuilder SetUpAccountNumber(string accountNumber)
+        public ISingleShipmentBuilder SetUpAccountNumber(string accountNumber)
         {
             if (string.IsNullOrWhiteSpace(accountNumber))
                 throw new ArgumentOutOfRangeException(nameof(accountNumber), "Account number cannot be null or empty.");
@@ -83,20 +82,20 @@ namespace Postident.Infrastructure.Services.DHL
         }
 
         /// <summary>
-        /// Set up senders address and name data
+        /// /// <inheritdoc cref="ISingleShipmentBuilder.SetUpSenderData"/>
         /// </summary>
         /// <param name="address"><see cref="Address"/> object containing senders address and naming data</param>
-        public SingleShipmentBuilder SetUpSenderData(Address address)
+        public ISingleShipmentBuilder SetUpSenderData(Address address)
         {
             SenderData = AddressGenerator(address, "Shipper");
             return this;
         }
 
         /// <summary>
-        /// Set up receiver address and name data - MANDATORY
+        /// /// <inheritdoc cref="ISingleShipmentBuilder.SetUpReceiverData"/>
         /// </summary>
         /// <param name="address"><see cref="Address"/> object containing receivers address and naming data</param>
-        public SingleShipmentBuilder SetUpReceiverData(Address address)
+        public ISingleShipmentBuilder SetUpReceiverData(Address address)
         {
             _ = address ?? throw new ArgumentNullException(nameof(address));
 
@@ -116,7 +115,7 @@ namespace Postident.Infrastructure.Services.DHL
                     new XElement(CisNamespace + "name1", address.Name))
                 : new XElement(CisNamespace + "name1", address.Name);
 
-            return new(type,
+            return new XElement(type,
                 nameSchema,
                 new XElement("Address",
                     new XElement(CisNamespace + "streetName", address.Street),
@@ -163,7 +162,7 @@ namespace Postident.Infrastructure.Services.DHL
             );
         }
 
-        public SingleShipmentBuilder SetUpItemDimensions(uint weightInKg, uint lengthInCm, uint widthInCm,
+        public ISingleShipmentBuilder SetUpItemDimensions(uint weightInKg, uint lengthInCm, uint widthInCm,
             uint heightInCm)
         {
             CheckDimensions(weightInKg, lengthInCm, widthInCm, heightInCm);
@@ -190,7 +189,7 @@ namespace Postident.Infrastructure.Services.DHL
             if (!string.IsNullOrEmpty(name)) throw new ArgumentNullException(name, $"Given {name} is 0. Every dimension must be a positive number!");
         }
 
-        public SingleShipmentBuilder Reset()
+        public ISingleShipmentBuilder Reset()
         {
             Id = null;
             ReceiverData = null;
@@ -203,13 +202,40 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public ValidationRequestXmlBuilder BuildShipment()
+        public IValidationRequestXmlBuilder BuildShipment()
+        {
+            CheckValidity();
+            FillMissingOptionalFieldsWithDefaults();
+
+            var shipment = new XElement("ShipmentOrder",
+                Id,
+                new XElement("Shipment",
+                    new XElement("ShipmentDetails",
+                        ServiceType,
+                        AccountNumber,
+                        ShippingDate,
+                        ShipmentItem
+                    ),
+                    SenderData,
+                    ReceiverData
+                )
+            );
+
+            Shipments.Add(shipment);
+
+            return _parentBuilder;
+        }
+
+        private void CheckValidity()
         {
             if (Id is null)
                 throw new MissingFieldException(nameof(SingleShipmentBuilder), nameof(Id));
             if (ReceiverData is null)
                 throw new MissingFieldException(nameof(SingleShipmentBuilder), nameof(ReceiverData));
+        }
 
+        private void FillMissingOptionalFieldsWithDefaults()
+        {
             if (SenderData is null)
             {
                 SetUpSenderData(new Address()
@@ -242,24 +268,6 @@ namespace Postident.Infrastructure.Services.DHL
 
             if (ServiceType is null)
                 SetUpDhlServiceType(DefaultShipmentValues.ServiceType);
-
-            var shipment = new XElement("ShipmentOrder",
-                Id,
-                new XElement("Shipment",
-                    new XElement("ShipmentDetails",
-                        ServiceType,
-                        AccountNumber,
-                        ShippingDate,
-                        ShipmentItem
-                    ),
-                    SenderData,
-                    ReceiverData
-                )
-            );
-
-            Shipments.Add(shipment);
-
-            return _parentBuilder;
         }
     }
 }

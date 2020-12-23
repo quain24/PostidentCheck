@@ -1,7 +1,6 @@
-﻿using System.Threading.Tasks;
-using MediatR;
-using Postident.Application.DHL.Commands;
+﻿using MediatR;
 using Postident.Infrastructure.Services;
+using System.Threading.Tasks;
 
 namespace PostidentCheck
 {
@@ -10,7 +9,7 @@ namespace PostidentCheck
         private readonly IMediator _mediator;
         private readonly TestService _test;
 
-        public MainApp(IMediator mediator, TestService test )
+        public MainApp(IMediator mediator, TestService test)
         {
             _mediator = mediator;
             _test = test;
