@@ -1,7 +1,7 @@
-﻿using System;
-using KeePass;
+﻿using KeePass;
 using Moq.AutoMock;
 using Postident.Infrastructure.Services.DHL;
+using System;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -40,8 +40,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 new DhlSettingsFromPasswordServer(test.Object, new DhlSettingsFromAppsettings()
                 {
                     BaseAddress = null,
-                    LanguageCode = "en",
-                    MaxParcelNumbersInQuery = 10,
+                    MaxValidationsInQuery = 10,
                     MaxQueriesPerSecond = 10,
                     Secret = "aa",
                     XmlSecret = "bb"
@@ -60,8 +59,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 new DhlSettingsFromPasswordServer(test.Object, new DhlSettingsFromAppsettings()
                 {
                     BaseAddress = "base",
-                    LanguageCode = "en",
-                    MaxParcelNumbersInQuery = 10,
+                    MaxValidationsInQuery = 10,
                     MaxQueriesPerSecond = val,
                     Secret = "aa",
                     XmlSecret = "bb"

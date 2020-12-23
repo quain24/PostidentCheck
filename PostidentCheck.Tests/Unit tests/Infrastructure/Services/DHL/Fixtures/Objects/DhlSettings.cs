@@ -31,5 +31,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures.Object
         {
             return Task.FromResult(_xmlSecret);
         }
+
+        public int MaxValidationsInQuery { get; set; } = 1;
     }
 }

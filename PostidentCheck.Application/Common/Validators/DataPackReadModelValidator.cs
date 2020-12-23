@@ -12,7 +12,7 @@ namespace Postident.Application.Common.Validators
                 .NotEmpty()
                 .WithSeverity(Severity.Error)
                 .WithMessage(d =>
-                    $"ID missing! recovered data: {nameof(d.PostIdent)} : {d.PostIdent}, {nameof(d.Carrier)} : {d.Carrier}, {nameof(d.City)} : {d.City}," +
+                    $"ID missing! recovered data: {nameof(d.PostIdent)} : {d.PostIdent}, {nameof(d.Carrier)} : {d.Carrier}, {nameof(d.City)} : {d.City}, " +
                     $"{nameof(d.CountryCode)} : {d.CountryCode}, {nameof(d.Street)} : {d.Street}, {nameof(d.ZipCode)} : {d.ZipCode}");
             
             When(d => string.IsNullOrWhiteSpace(d.PostIdent) is false, () =>
@@ -20,7 +20,7 @@ namespace Postident.Application.Common.Validators
                 RuleFor(d => d.PostIdent)
                     .Must(s => long.TryParse(s, out var number))
                     .WithMessage(d =>
-                        $"ID {d.Id}: PostIdent (\"{d.PostIdent}\") is not empty and not a number.");
+                        $"ID {d.Id}: PostIdent (\"{d.PostIdent}\") is present, but it is not a number.");
             });
 
             RuleFor(d => d.CountryCode)

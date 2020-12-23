@@ -1,76 +1,150 @@
-﻿using System;
+﻿using Postident.Core.Entities;
+using Postident.Core.Enums;
+using PostidentCheck;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using Postident.Core.Entities;
-using PostidentCheck;
 
 namespace Postident.Tests.Integration_tests.Fixtures
 {
     public class DatabaseFixture
     {
-        private static List<DataPackReadModel> ParcelSeedData;
+        private static List<DataPackReadModel> ReadModelSeedData;
+        private static List<InfoPackWriteModel> WriteModelSeedData;
 
-        private static Func<List<DataPackReadModel>> GetParcels = PopulateParcelSeedData;
+        private static Func<List<DataPackReadModel>> GetDataPacks = PopulateDataPacksSeedData;
+        private static Func<List<InfoPackWriteModel>> GetInfoPacks = PopulateInfoPacksSeedData;
 
-        private static List<DataPackReadModel> PopulateParcelSeedData()
+        private static List<DataPackReadModel> PopulateDataPacksSeedData()
         {
-            if (ParcelSeedData != null)
-                return ParcelSeedData;
+            if (ReadModelSeedData != null)
+                return ReadModelSeedData;
 
             var fileLocalization = Directory.GetCurrentDirectory()
                 .Replace(Assembly.GetAssembly(typeof(Program)).GetName().ToString(),
                     Assembly.GetAssembly(typeof(DatabaseFixture)).GetName().ToString());
 
             var parcelSeedDataJsonModel =
-                JsonSerializer.Deserialize<List<ParcelJsonCompatibleModel>>(File.ReadAllText(fileLocalization +
-                    "\\Integration tests\\Fixtures\\InMemoryDbContent.json"));
+                JsonSerializer.Deserialize<List<DataPackJsonCompatibleModel>>(File.ReadAllText(fileLocalization +
+                    "\\Integration tests\\Fixtures\\InMemoryReadDb.json"));
 
-            ParcelSeedData = parcelSeedDataJsonModel.Select(p => new DataPackReadModel()
+            ReadModelSeedData = parcelSeedDataJsonModel.Select(p => new DataPackReadModel()
             {
-                CarrierId = p.carrier,
-                ParcelId = p.parcelId,
-                ParcelStatus = p.parcelStatus,
-                TrackingNumber = p.tracking
+                Street = p.Street,
+                PostIdent = p.PostIdent,
+                City = p.City,
+                CountryCode = p.CountryCode,
+                Carrier = p.Carrier,
+                DataPackChecked = p.DataPackChecked,
+                Id = p.Id,
+                ZipCode = p.ZipCode
             }).ToList();
 
-            GetParcels = CloneParcelDataSeed;
-            return ParcelSeedData;
+            GetDataPacks = CloneDataPackDataSeed;
+            return ReadModelSeedData;
         }
 
-        private static List<DataPackReadModel> CloneParcelDataSeed()
+        private static List<InfoPackWriteModel> PopulateInfoPacksSeedData()
         {
-            return ParcelSeedData.Select(p =>
+            if (WriteModelSeedData != null)
+                return WriteModelSeedData;
+
+            var fileLocalization = Directory.GetCurrentDirectory()
+                .Replace(Assembly.GetAssembly(typeof(Program)).GetName().ToString(),
+                    Assembly.GetAssembly(typeof(DatabaseFixture)).GetName().ToString());
+
+            var parcelSeedDataJsonModel =
+                JsonSerializer.Deserialize<List<InfoPackJsonCompatibleModel>>(File.ReadAllText(fileLocalization +
+                    "\\Integration tests\\Fixtures\\InMemoryWriteDb.json"));
+
+            WriteModelSeedData = parcelSeedDataJsonModel.Select(p => new InfoPackWriteModel()
+            {
+                CheckStatus = p.CheckStatus,
+                Id = p.Id,
+                Message = p.Message
+            }).ToList();
+
+            GetInfoPacks = CloneInfoPackDataSeed;
+            return WriteModelSeedData;
+        }
+
+        private static List<DataPackReadModel> CloneDataPackDataSeed()
+        {
+            return ReadModelSeedData.Select(p =>
             {
                 return new DataPackReadModel()
                 {
-                    CarrierId = p.CarrierId,
-                    TrackingNumber = p.TrackingNumber,
-                    ParcelStatus = p.ParcelStatus,
-                    ParcelId = p.ParcelId
+                    Street = p.Street,
+                    PostIdent = p.PostIdent,
+                    City = p.City,
+                    CountryCode = p.CountryCode,
+                    Carrier = p.Carrier,
+                    DataPackChecked = p.DataPackChecked,
+                    Id = p.Id,
+                    ZipCode = p.ZipCode
                 };
             }).ToList();
         }
 
-        public static DbContextInMemory CreatePopulatedDatabaseNoStateDbContext()
+        private static List<InfoPackWriteModel> CloneInfoPackDataSeed()
         {
-            var context = new DbContextInMemory(DbContextInMemoryOptions.GetOptions());
+            return WriteModelSeedData.Select(p =>
+            {
+                return new InfoPackWriteModel()
+                {
+                    CheckStatus = p.CheckStatus,
+                    Id = p.Id,
+                    Message = p.Message
+                };
+            }).ToList();
+        }
+
+        public static DataPacksDbContextInMemory CreateDataPackPopulatedDatabaseNoStateDbContext()
+        {
+            var context = new DataPacksDbContextInMemory(DataPacksDbContextInMemoryOptions.GetOptions());
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
-            context.Parcels.AddRange(GetParcels());
+            context.DataPacks.AddRange(GetDataPacks());
             context.SaveChanges();
             return context;
         }
 
-        private class ParcelJsonCompatibleModel
+        public static InfoPacksDbContextInMemory CreateInfoPackPopulatedDatabaseNoStateDbContext()
         {
-            public string carrier { get; set; }
-            public int parcelId { get; set; }
-            public string tracking { get; set; }
-            public string parcelStatus { get; set; }
+            var context = new InfoPacksDbContextInMemory(InfoPacksDbContextInMemoryOptions.GetOptions());
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
+
+            context.InfoPacks.AddRange(GetDataPacks());
+            context.SaveChanges();
+            return context;
+        }
+
+        private class DataPackJsonCompatibleModel
+        {
+            public string Id { get; set; }
+            public Carrier Carrier { get; set; }
+            public string PostIdent { get; set; }
+            public string Street { get; set; }
+            public string ZipCode { get; set; }
+            public string City { get; set; }
+            public string CountryCode { get; set; }
+
+            /// <summary>
+            /// -1 - not checked, 0 - checked, contains errors, 1 - valid
+            /// </summary>
+            public int DataPackChecked { get; set; }
+        }
+
+        private class InfoPackJsonCompatibleModel
+        {
+            public string Id { get; set; }
+            public InfoPackCheckStatus CheckStatus { get; set; }
+            public string Message { get; set; }
         }
     }
 }

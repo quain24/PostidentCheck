@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Unit tests\Infrastructure\Services\DHL\DhlResponseDeserializerTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Divergic.Logging.Xunit" Version="3.6.0" />
     <PackageReference Include="JustEat.HttpClientInterception" Version="3.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.1" />
@@ -22,7 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Integration tests\Fixtures\InMemoryDbContent.json">
+    <None Update="Integration tests\Fixtures\InMemoryReadDb.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Integration tests\Fixtures\InMemoryWriteDb.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="xunit.runner.json">
@@ -31,8 +38,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Integration tests\Infrastructure\Common\Fixtures\" />
     <Folder Include="Integration tests\Infrastructure\DHL\" />
     <Folder Include="Unit tests\Application\Services\" />
+    <Folder Include="Unit tests\Infrastructure\Fixtures\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Unit tests\Infrastructure\Services\DHL\DhlResponseDeserializerTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
