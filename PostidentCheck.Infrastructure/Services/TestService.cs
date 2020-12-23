@@ -88,7 +88,7 @@ namespace Postident.Infrastructure.Services
             var drespo = await deser.Deserialize(response);
 
             Console.WriteLine(string.Join("\n", drespo.Responses));
-
+            // ^([\w[:punct:],\-,\. ]+) ([0-9]{1,5})\s?([\w[:punct:]\-/]*)$
             var t = "";
         }
     }

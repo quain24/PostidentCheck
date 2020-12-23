@@ -1,7 +1,7 @@
-﻿using Postident.Infrastructure.Common;
-using System;
+﻿using System;
+using Postident.Infrastructure.Common;
 
-namespace Postident.Infrastructure.Services.DHL
+namespace Postident.Infrastructure.Interfaces.DHL
 {
     public interface ISingleShipmentBuilder
     {

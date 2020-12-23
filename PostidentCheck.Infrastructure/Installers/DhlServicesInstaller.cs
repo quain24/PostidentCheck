@@ -34,7 +34,6 @@ namespace Postident.Infrastructure.Installers
                 {
                     client.BaseAddress = new Uri(dhlSettingsFromFile.BaseAddress);
                     client.Timeout = TimeSpan.FromSeconds(30);
-                    client.BaseAddress = new Uri("https://cig.dhl.de/services/production/soap/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
                     client.DefaultRequestHeaders.Add("SOAPAction", "\"urn:validateShipment\"");
                 })

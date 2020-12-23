@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Postident.Infrastructure.Services.DHL
 {
-    public class DhlPostidentService : ApiServiceBase<DhlResponseDto, DataPackReadModel>, IDhlApiService
+    public class DhlPostidentService : ApiServiceBase<DhlMainResponseDto, DataPackReadModel>, IDhlApiService
     {
         private const string ServiceName = "DHL PostIdent";
 
@@ -27,7 +27,7 @@ namespace Postident.Infrastructure.Services.DHL
         private readonly IDhlSettings _configuration;
 
         public DhlPostidentService(IHttpClientFactory httpFactory,
-            ICarrierApiServiceResponseDeserializer<DhlResponseDto> serializer,
+            ICarrierApiServiceResponseDeserializer<DhlMainResponseDto> serializer,
             IValidator<DataPackReadModel> parcelValidator,
             ILogger<DhlPostidentService> logger,
             IDhlSettings configuration)

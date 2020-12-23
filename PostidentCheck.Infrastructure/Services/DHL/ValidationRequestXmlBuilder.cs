@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Postident.Infrastructure.Interfaces.DHL;
 
 namespace Postident.Infrastructure.Services.DHL
 {

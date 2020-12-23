@@ -3,6 +3,7 @@ using Postident.Infrastructure.Common;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Postident.Infrastructure.Interfaces.DHL;
 
 namespace Postident.Infrastructure.Services.DHL
 {
@@ -53,7 +54,7 @@ namespace Postident.Infrastructure.Services.DHL
         }
 
         /// <summary>
-        /// /// <inheritdoc cref="ISingleShipmentBuilder.SetUpShippingDate"/>
+        /// <inheritdoc cref="ISingleShipmentBuilder.SetUpShippingDate"/>
         /// </summary>
         /// <param name="date">Ship-out date of this shipment</param>
         public ISingleShipmentBuilder SetUpShippingDate(DateTime date)
@@ -68,7 +69,7 @@ namespace Postident.Infrastructure.Services.DHL
         }
 
         /// <summary>
-        /// /// <inheritdoc cref="ISingleShipmentBuilder.SetUpAccountNumber"/>
+        /// <inheritdoc cref="ISingleShipmentBuilder.SetUpAccountNumber"/>
         /// </summary>
         /// <param name="accountNumber">Shippers account number</param>
         public ISingleShipmentBuilder SetUpAccountNumber(string accountNumber)
@@ -82,7 +83,7 @@ namespace Postident.Infrastructure.Services.DHL
         }
 
         /// <summary>
-        /// /// <inheritdoc cref="ISingleShipmentBuilder.SetUpSenderData"/>
+        /// <inheritdoc cref="ISingleShipmentBuilder.SetUpSenderData"/>
         /// </summary>
         /// <param name="address"><see cref="Address"/> object containing senders address and naming data</param>
         public ISingleShipmentBuilder SetUpSenderData(Address address)
@@ -92,7 +93,7 @@ namespace Postident.Infrastructure.Services.DHL
         }
 
         /// <summary>
-        /// /// <inheritdoc cref="ISingleShipmentBuilder.SetUpReceiverData"/>
+        /// <inheritdoc cref="ISingleShipmentBuilder.SetUpReceiverData"/>
         /// </summary>
         /// <param name="address"><see cref="Address"/> object containing receivers address and naming data</param>
         public ISingleShipmentBuilder SetUpReceiverData(Address address)

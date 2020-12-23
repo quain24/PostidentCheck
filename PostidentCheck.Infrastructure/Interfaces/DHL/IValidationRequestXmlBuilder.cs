@@ -1,6 +1,7 @@
 ﻿using KeePass.Models;
+using Postident.Infrastructure.Services.DHL;
 
-namespace Postident.Infrastructure.Services.DHL
+namespace Postident.Infrastructure.Interfaces.DHL
 {
     public interface IValidationRequestXmlBuilder
     {
