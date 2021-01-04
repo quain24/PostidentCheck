@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Postident.Application.Common.Interfaces;
-using Postident.Core.Common;
 using Postident.Core.Entities;
 using Postident.Infrastructure.Common;
 using Postident.Infrastructure.Interfaces;
+using Postident.Infrastructure.Mappers;
 using Postident.Infrastructure.Services;
 using System;
 using System.Collections.Generic;
@@ -16,13 +16,13 @@ namespace Postident.Infrastructure.Installers
         public static IServiceCollection SetupCommonDependencies(this IServiceCollection services,
             IConfiguration configuration)
         {
-            StaticObjectPropertyFromFileFiller.PopulateStaticProperties<DefaultShipmentValuesFromFile>(typeof(DefaultShipmentValues), configuration, "DefaultShipmentValues");
-
+            //StaticObjectPropertyFromFileFiller.PopulateStaticProperties<DefaultShipmentValuesFromFile>(typeof(DefaultShipmentValues), configuration, "DefaultShipmentValues");
+            services.AddDefaultShipmentValues(configuration);
             services.AddDefaultNamingMap(configuration);
-            services.AddTransient<IOfflineDataPackValidationService<InfoPackWriteModel>, OfflineDataPackValidationService>();
-            services.AddTransient<IInvalidValidationToWriteModelMapper<InfoPackWriteModel>, InvalidValidationToWriteModelMapper>();
+            services.AddMappingServices();
 
-            services.AddTransient<TestService>();
+            services.AddTransient<IOfflineDataPackValidationService<InfoPackWriteModel>, OfflineDataPackValidationService>();
+            services.AddTransient<IValidationService, ValidationService>();
 
             return services;
         }
@@ -37,6 +37,24 @@ namespace Postident.Infrastructure.Installers
             configuration.Bind("DefaultNamingMap", mapObject);
 
             services.AddSingleton(_ => new DefaultNamingMap(mapObject.Map));
+
+            return services;
+        }
+
+        private static IServiceCollection AddDefaultShipmentValues(this IServiceCollection services, IConfiguration configuration)
+        {
+            var defaults = new DefaultShipmentValuesFromFile();
+            configuration.Bind("DefaultShipmentValues", defaults);
+            services.AddSingleton<IDefaultShipmentValues, DefaultShipmentValues>(_ => new DefaultShipmentValues(defaults));
+
+            return services;
+        }
+
+        private static IServiceCollection AddMappingServices(this IServiceCollection services)
+        {
+            services.AddTransient<IInvalidValidationToWriteModelMapper<InfoPackWriteModel>, InvalidValidationToWriteModelMapper>();
+            services.AddTransient<IDhlResponseToWriteModelMapper, DhlResponseToWriteModelMapper>();
+            services.AddTransient<IReadModelToDataPackMapper, ReadModelToDataPackMapper>();
 
             return services;
         }

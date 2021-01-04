@@ -15,7 +15,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Postident.Infrastructure.Interfaces;
 
 namespace Postident.Infrastructure.Services.DHL
 {

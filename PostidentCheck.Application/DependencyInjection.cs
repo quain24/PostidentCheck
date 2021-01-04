@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Postident.Application.Common.Models;
 using Postident.Application.Common.Validators;
-using Postident.Core.Entities;
 
 namespace Postident.Application
 {
@@ -12,7 +12,8 @@ namespace Postident.Application
         {
             services.AddMediatR(typeof(DependencyInjection));
 
-            services.AddTransient<IValidator<DataPackReadModel>, DataPackReadModelValidator>();
+            services.AddTransient<IValidator<DataPack>, DataPackValidator>();
+            services.AddTransient<IValidator<Address>, AddressValidator>();
 
             return services;
         }
