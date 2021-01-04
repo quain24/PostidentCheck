@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Postident.Application.Common.Interfaces;
 using Postident.Application.DHL;
+using Postident.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -38,6 +39,8 @@ namespace Postident.Infrastructure.Services.DHL
         {
             try
             {
+                var t = message.RequestMessage.Content.ReadAsStringAsync().Result;
+                var tt = message.Content.ReadAsStringAsync().Result;
                 var document = XDocument.Parse(await message?.Content?.ReadAsStringAsync() ?? string.Empty);
 
                 RemoveNamespacesFrom(document);
@@ -48,7 +51,7 @@ namespace Postident.Infrastructure.Services.DHL
             }
             catch (Exception ex) when (ex is InvalidOperationException || ex is XmlException)
             {
-                _logger?.LogError(ex, "{0}: Could not deserialize api response.", _carrierName);
+                _logger?.LogError(ex, "{0}: Could not deserialize one of api responses.", _carrierName);
                 return null;
             }
         }
@@ -79,28 +82,24 @@ namespace Postident.Infrastructure.Services.DHL
                 new DhlMainResponseDto() :
                 new DhlMainResponseDto
                 {
-                    MainFaultCode = faultInfo.Element("faultcode")?.Value ?? string.Empty,
-                    MainFaultText = faultInfo.Element("faultstring")?.Value ?? string.Empty,
-                    Responses = ImmutableList.Create
-                    (
-                        new DhlResponseDto
-                        {
-                            ErrorCode = faultInfo.Element("detail")
-                                ?.Element("ResponseStatus")
-                                ?.Attribute("statusCode")?.Value ?? string.Empty,
-                            ErrorText = faultInfo.Element("detail")
-                                ?.Element("ResponseStatus")
-                                ?.Attribute("statusText")?.Value ?? string.Empty,
-                            StatusMessages = ImmutableHashSet.Create
-                            (
-                                StringComparer.InvariantCultureIgnoreCase,
-                                faultInfo.Element("detail")
-                                    ?.Element("ResponseStatus")
-                                    ?.Attribute("statusMessage")
-                                    ?.Value
-                            )
-                        }
-                    )
+                    MainFaultCode = string.Join(", error code: ",
+                        faultInfo
+                            .Element("faultcode")?.Value ?? string.Empty,
+                        faultInfo.Element("detail")
+                            ?.Element("ResponseStatus")
+                            ?.Attribute("statusCode")?.Value ?? "none"),
+                    MainFaultText = string.Join(' ',
+                        faultInfo
+                            .Element("faultstring")?.Value ?? string.Empty,
+                        // Duplicated info in english:
+                        //faultInfo.Element("detail")
+                        //    ?.Element("ResponseStatus")
+                        //    ?.Attribute("statusText")?.Value ?? string.Empty,
+                        faultInfo.Element("detail")
+                            ?.Element("ResponseStatus")
+                            ?.Attribute("statusMessage")
+                            ?.Value),
+                    Responses = ImmutableList<DhlResponseDto>.Empty
                 };
         }
 
@@ -125,13 +124,13 @@ namespace Postident.Infrastructure.Services.DHL
                         return new DhlResponseDto()
                         {
                             Key = e.Element("sequenceNumber")?.Value ?? string.Empty,
-                            ErrorCode = e.Element("Status")
-                                ?.Element("statusCode")?.Value ?? string.Empty,
+                            ErrorCode = int.Parse(e.Element("Status")
+                                ?.Element("statusCode")?.Value ?? "none"),
                             ErrorText = e.Element("Status")
                                 ?.Element("statusText")?.Value ?? string.Empty,
                             StatusMessages = e.Element("Status")
                                              ?.Elements("statusMessage")
-                                             .Select(el => el.Value)
+                                             .Select(el => el.Value.RemoveMultiplicatedWhitespaces())
                                              .ToImmutableHashSet(StringComparer.InvariantCultureIgnoreCase) ?? ImmutableHashSet<string>.Empty
                         };
                     }).ToImmutableList()
