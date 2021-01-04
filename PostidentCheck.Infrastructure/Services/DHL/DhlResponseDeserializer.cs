@@ -3,7 +3,6 @@ using Postident.Application.Common.Interfaces;
 using Postident.Application.DHL;
 using Postident.Core.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Net.Http;
@@ -39,8 +38,6 @@ namespace Postident.Infrastructure.Services.DHL
         {
             try
             {
-                var t = message.RequestMessage.Content.ReadAsStringAsync().Result;
-                var tt = message.Content.ReadAsStringAsync().Result;
                 var document = XDocument.Parse(await message?.Content?.ReadAsStringAsync() ?? string.Empty);
 
                 RemoveNamespacesFrom(document);
