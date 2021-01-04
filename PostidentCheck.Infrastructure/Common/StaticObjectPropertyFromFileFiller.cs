@@ -1,9 +1,9 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Linq;
 using System.Reflection;
 
-namespace Postident.Core.Common
+namespace Postident.Infrastructure.Common
 {
     public static class StaticObjectPropertyFromFileFiller
     {

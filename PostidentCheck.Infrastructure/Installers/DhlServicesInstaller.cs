@@ -1,5 +1,4 @@
-﻿using KeePass;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Postident.Application.Common.Interfaces;
@@ -28,7 +27,14 @@ namespace Postident.Infrastructure.Installers
 
             var dhlSettingsFromFile = new DhlSettingsFromAppsettings();
             configuration.Bind("DHL", dhlSettingsFromFile);
+#if DEBUG
+            var logins = new DhlOfflineSettings.AppSet();
+            configuration.Bind("KeePassOfflineStore", logins);
+            services.AddSingleton<IDhlSettings, DhlOfflineSettings>(provider =>
+            new DhlOfflineSettings(dhlSettingsFromFile, logins.Login, logins.Password, logins.XmlLogin, logins.XmlPassword));
+#else
             services.AddSingleton<IDhlSettings, DhlSettingsFromPasswordServer>(provider => new DhlSettingsFromPasswordServer(provider.GetRequiredService<IKeePassService>(), dhlSettingsFromFile));
+#endif
 
             services.AddHttpClient(serviceName, client =>
                 {
@@ -41,7 +47,11 @@ namespace Postident.Infrastructure.Installers
                 .AddPolicyHandler(HttpClientPolicies.WaitAndRetryAsyncPolicy(serviceName, 3)) // 3 retries, so 4 actual attempts
                 .AddPolicyHandler(HttpClientPolicies.CircuitBreakerAsyncOneTimePolicy(serviceName, 10)); // actual attempts * how many messages can fail without a good between one between
 
-            services.AddTransient<IDhlApiService, DhlPostidentService>();
+            services.AddTransient<IValidationRequestXmlBuilder, ValidationRequestXmlBuilder>();
+            services.AddSingleton<IValidationRequestXmlBuilderFactory, ValidationRequestXmlBuilderFactory>();
+            services.AddTransient<ISingleShipmentBuilder, SingleShipmentBuilder>();
+
+            services.AddTransient<IDhlApiService, DhlOnlineValidationService>();
             services.AddTransient<ICarrierApiServiceResponseDeserializer<DhlMainResponseDto>, DhlResponseDeserializer>
             (srv => new DhlResponseDeserializer(serviceName, srv.GetRequiredService<ILogger<DhlResponseDeserializer>>()));
 

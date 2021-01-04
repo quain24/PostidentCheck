@@ -1,4 +1,6 @@
-﻿namespace Postident.Infrastructure.Services.DHL
+﻿using Postident.Infrastructure.Common;
+
+namespace Postident.Infrastructure.Services.DHL
 {
     public class DhlSettingsFromAppsettings : CarrierSettingsFromAppsettings
     {
