@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.CircuitBreaker;
 using Postident.Application.Common.Extensions;
@@ -27,7 +26,6 @@ namespace Postident.Infrastructure.Services
     {
         private readonly string _serviceName;
         private readonly ICarrierApiServiceResponseDeserializer<TResponseDTO> _deserializer;
-        private readonly IValidator<TQueriedDataType> _dataPackValidator;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -37,11 +35,10 @@ namespace Postident.Infrastructure.Services
         /// <param name="deserializer">Object used to deserialize API responses (<see cref="HttpResponseMessage"/>) into chosen <typeparamref name="TResponseDTO"/> type</param>
         /// <param name="dataPackValidator">Validates <see cref="DataPackReadModel"/> objects, which data will be used to create API queries</param>
         /// <param name="logger">Used to log any errors, optional</param>
-        protected ApiServiceBase(string serviceName, ICarrierApiServiceResponseDeserializer<TResponseDTO> deserializer, IValidator<TQueriedDataType> dataPackValidator, ILogger logger)
+        protected ApiServiceBase(string serviceName, ICarrierApiServiceResponseDeserializer<TResponseDTO> deserializer, ILogger logger)
         {
             _serviceName = serviceName;
             _deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer), "Deserializer is required!");
-            _dataPackValidator = dataPackValidator;
             _logger = logger;
         }
 
@@ -67,9 +64,7 @@ namespace Postident.Infrastructure.Services
         {
             try
             {
-                var validatedDataPacks = GetOnlyValidData(dataPacks).ToList();
-
-                if (validatedDataPacks.IsNullOrEmpty())
+                if (dataPacks.IsNullOrEmpty())
                 {
                     _logger?.LogInformation("{0}: No DataPacks for api service to process, exiting now", _serviceName);
                     return Array.Empty<TResponseDTO>();
@@ -81,7 +76,7 @@ namespace Postident.Infrastructure.Services
                     return Array.Empty<TResponseDTO>();
                 }
 
-                var requests = await GenerateRequestsFrom(validatedDataPacks, token);
+                var requests = await GenerateRequestsFrom(dataPacks, token);
                 var responses = await AskRemoteServiceForDataAsync(requests, token);
                 return await SerializeResponsesToDtos(responses, token).ConfigureAwait(false);
             }
@@ -93,29 +88,6 @@ namespace Postident.Infrastructure.Services
         }
 
         protected virtual Task<bool> AuthorizeClient(CancellationToken token) => Task.FromResult(true);
-
-        private IEnumerable<TQueriedDataType> GetOnlyValidData(IEnumerable<TQueriedDataType> dataPacks)
-        {
-            if (dataPacks.IsNullOrEmpty())
-                return Array.Empty<TQueriedDataType>();
-
-            List<TQueriedDataType> validDataPacks = new(dataPacks.Count());
-
-            foreach (var dataPack in dataPacks)
-            {
-                var result = _dataPackValidator.Validate(dataPack);
-                if (result.IsValid)
-                {
-                    validDataPacks.Add(dataPack);
-                }
-                else
-                {
-                    _logger?.LogError("{0}: DataPack is invalid. Errors: {1}", _serviceName, result.CombinedErrors());
-                }
-            }
-
-            return validDataPacks;
-        }
 
         /// <summary>
         /// When overriden, provides a way to generate <see cref="HttpRequestMessage"/> objects for the base class.
