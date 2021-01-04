@@ -11,7 +11,7 @@ namespace Postident.Infrastructure.Persistence.Configurations
             builder.ToTable("OrderAddressStatus", "om");
             builder.HasKey(e => e.Id);
             builder.Property(e => e.Id).HasColumnName("orderId");
-            builder.Property(e => e.CheckStatus).HasColumnName("checkStatus");
+            builder.Property(e => e.CheckStatus).HasColumnName("checkStatus").HasConversion<int>();
             builder.Property(e => e.Message).HasColumnName("message");
         }
     }
