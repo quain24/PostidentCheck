@@ -6,13 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Unit tests\Infrastructure\Services\DHL\DhlResponseDeserializerTests.cs" />
+    <Compile Remove="FakesAssemblies\**" />
+    <EmbeddedResource Remove="FakesAssemblies\**" />
+    <None Remove="FakesAssemblies\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Divergic.Logging.Xunit" Version="3.6.0" />
     <PackageReference Include="JustEat.HttpClientInterception" Version="3.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
     <PackageReference Include="Moq" Version="4.15.2" />
     <PackageReference Include="Moq.AutoMock" Version="2.3.0" />
@@ -38,14 +41,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Integration tests\Infrastructure\Common\Fixtures\" />
+    <Folder Include="Integration tests\Infrastructure\Common\" />
     <Folder Include="Integration tests\Infrastructure\DHL\" />
-    <Folder Include="Unit tests\Application\Services\" />
+    <Folder Include="Unit tests\Application\Services\DHL\Fixtures\" />
+    <Folder Include="Unit tests\Infrastructure\Common\" />
     <Folder Include="Unit tests\Infrastructure\Fixtures\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Unit tests\Infrastructure\Services\DHL\DhlResponseDeserializerTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,6 +53,10 @@
     <ProjectReference Include="..\PostidentCheck.Core\Postident.Core.csproj" />
     <ProjectReference Include="..\PostidentCheck.Infrastructure\Postident.Infrastructure.csproj" />
     <ProjectReference Include="..\PostidentCheck\PostidentCheck.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalDesignTimeBuildInput Remove="FakesAssemblies\**" />
   </ItemGroup>
 
 </Project>

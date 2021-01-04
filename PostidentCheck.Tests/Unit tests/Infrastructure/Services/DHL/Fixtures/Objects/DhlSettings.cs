@@ -1,7 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using KeePass.Models;
+﻿using KeePass.Models;
 using Postident.Infrastructure.Interfaces.DHL;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures.Objects
 {
@@ -23,9 +23,6 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures.Object
         {
             return Task.FromResult(_secret);
         }
-
-        public string LanguageCode { get; set; }
-        public int MaxParcelNumbersInQuery { get; set; }
 
         public Task<Secret> XmlSecret(CancellationToken ct)
         {

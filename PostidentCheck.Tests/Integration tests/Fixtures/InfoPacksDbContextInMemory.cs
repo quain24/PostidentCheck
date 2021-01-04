@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Postident.Application.Common.Interfaces;
 using Postident.Core.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Postident.Tests.Integration_tests.Fixtures
 {
@@ -13,13 +12,19 @@ namespace Postident.Tests.Integration_tests.Fixtures
         : base(options)
         {
         }
-        public DbSet<DataPackReadModel> InfoPacks { get; }
 
+        public DbSet<InfoPackWriteModel> InfoPacks { get; set; }
 
         public Task<int> SaveChangesAsync(IEnumerable<InfoPackWriteModel> infos)
         {
             base.UpdateRange(infos);
             return SaveChangesAsync();
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<InfoPackWriteModel>().Property(p => p.CheckStatus).HasConversion<int>();
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

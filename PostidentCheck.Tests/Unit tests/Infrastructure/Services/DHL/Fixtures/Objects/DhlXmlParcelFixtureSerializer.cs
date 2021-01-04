@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using Postident.Infrastructure.Common;
+using System.IO;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using Postident.Infrastructure.Common;
 
 namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures.Objects
 {

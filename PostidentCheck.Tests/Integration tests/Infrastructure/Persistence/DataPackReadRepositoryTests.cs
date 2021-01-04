@@ -1,9 +1,11 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Postident.Core.Enums;
+﻿using Postident.Core.Enums;
 using Postident.Infrastructure.Persistence;
 using Postident.Tests.Integration_tests.Fixtures;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Postident.Core.Entities;
 using Xunit;
 
 namespace Postident.Tests.Integration_tests.Infrastructure.Persistence
@@ -33,6 +35,36 @@ namespace Postident.Tests.Integration_tests.Infrastructure.Persistence
         }
 
         [Theory]
+        [InlineData("1000553417")]
+        [InlineData("1000553850")]
+        [InlineData("1000563031")]
+        public async Task Will_return_correct_DataPack_when_given_valid_id(string id)
+        {
+            Repository = new DataPackReadRepository(_fixture);
+
+            var actual = await Repository.GetDataPack(id, CancellationToken.None);
+
+            Assert.True(actual.Count == 1);
+            Assert.All(actual, parcel => Assert.True(parcel.Id == id));
+        }
+
+        [Theory]
+        [InlineData("1000553417", "1000553850", "1000563031")]
+        [InlineData("1000553850", "1000571751", "1000573003")]
+        [InlineData("1000563031", "1000553417", "1000571751")]
+        public async Task Will_return_correct_DataPacks_when_given_valid_multiple_ids(string id, string id2, string id3)
+        {
+            Repository = new DataPackReadRepository(_fixture);
+
+            var actual = await Repository.GetDataPacks(new[] { id, id2, id3 }, CancellationToken.None);
+
+            Assert.True(actual.Count == 3);
+            Assert.Contains(actual, d => d.Id == id);
+            Assert.Contains(actual, d => d.Id == id2);
+            Assert.Contains(actual, d => d.Id == id3);
+        }
+
+        [Theory]
         [InlineData(Carrier.DHL, Carrier.DHL_Sperr)]
         [InlineData(Carrier.DHL_Sperr, Carrier.DPD)]
         [InlineData(Carrier.DHL, Carrier.DPD)]
@@ -53,6 +85,14 @@ namespace Postident.Tests.Integration_tests.Infrastructure.Persistence
             Repository = new DataPackReadRepository(_fixture);
 
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await Repository.GetDataPacks((Carrier)15100900, CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task Will_throw_ArgumentOutOfRange_exception_when_given_empty_id()
+        {
+            Repository = new DataPackReadRepository(_fixture);
+
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await Repository.GetDataPack("", CancellationToken.None));
         }
     }
 }

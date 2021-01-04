@@ -33,14 +33,14 @@ namespace Postident.Tests.Integration_tests.Fixtures
 
             ReadModelSeedData = parcelSeedDataJsonModel.Select(p => new DataPackReadModel()
             {
-                Street = p.Street,
-                PostIdent = p.PostIdent,
-                City = p.City,
-                CountryCode = p.CountryCode,
-                Carrier = p.Carrier,
-                DataPackChecked = p.DataPackChecked,
-                Id = p.Id,
-                ZipCode = p.ZipCode
+                Street = p.street,
+                PostIdent = p.postIdent,
+                City = p.city,
+                CountryCode = p.country,
+                Carrier = Enum.Parse<Carrier>(p.carrier),
+                DataPackChecked = (InfoPackCheckStatus)p.checkStatus,
+                Id = p.orderId,
+                ZipCode = p.zip
             }).ToList();
 
             GetDataPacks = CloneDataPackDataSeed;
@@ -62,9 +62,9 @@ namespace Postident.Tests.Integration_tests.Fixtures
 
             WriteModelSeedData = parcelSeedDataJsonModel.Select(p => new InfoPackWriteModel()
             {
-                CheckStatus = p.CheckStatus,
-                Id = p.Id,
-                Message = p.Message
+                CheckStatus = (InfoPackCheckStatus)p.checkStatus,
+                Id = p.orderId,
+                Message = p.message
             }).ToList();
 
             GetInfoPacks = CloneInfoPackDataSeed;
@@ -119,32 +119,32 @@ namespace Postident.Tests.Integration_tests.Fixtures
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
-            context.InfoPacks.AddRange(GetDataPacks());
+            context.InfoPacks.AddRange(GetInfoPacks());
             context.SaveChanges();
             return context;
         }
 
         private class DataPackJsonCompatibleModel
         {
-            public string Id { get; set; }
-            public Carrier Carrier { get; set; }
-            public string PostIdent { get; set; }
-            public string Street { get; set; }
-            public string ZipCode { get; set; }
-            public string City { get; set; }
-            public string CountryCode { get; set; }
+            public string orderId { get; set; }
+            public string carrier { get; set; }
+            public string postIdent { get; set; }
+            public string street { get; set; }
+            public string zip { get; set; }
+            public string city { get; set; }
+            public string country { get; set; }
 
             /// <summary>
             /// -1 - not checked, 0 - checked, contains errors, 1 - valid
             /// </summary>
-            public int DataPackChecked { get; set; }
+            public int checkStatus { get; set; }
         }
 
         private class InfoPackJsonCompatibleModel
         {
-            public string Id { get; set; }
-            public InfoPackCheckStatus CheckStatus { get; set; }
-            public string Message { get; set; }
+            public string orderId { get; set; }
+            public int checkStatus { get; set; }
+            public string message { get; set; }
         }
     }
 }

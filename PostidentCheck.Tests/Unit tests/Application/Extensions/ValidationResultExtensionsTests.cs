@@ -1,6 +1,6 @@
-﻿using System;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using Postident.Application.Common.Extensions;
+using System;
 using Xunit;
 using Xunit.Abstractions;
 
