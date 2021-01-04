@@ -35,6 +35,7 @@ namespace Postident.Infrastructure.Services
         /// <param name="dataPacks">Collection of <see cref="DataPackReadModel"/> to be validated</param>
         /// <param name="invalidEntries">Collection of <see cref="InfoPackWriteModel"/> containing all of invalid <see cref="DataPackReadModel"/> translated to write models</param>
         /// <returns>Collection of valid <see cref="DataPackReadModel"/></returns>
+        /// <exception cref="ArgumentNullException">When given data packs are null</exception>
         public IEnumerable<DataPack> FilterOutInvalidDataPacksFrom(IList<DataPack> dataPacks, out IEnumerable<InfoPackWriteModel> invalidEntries)
         {
             _ = dataPacks ?? throw new ArgumentNullException(nameof(dataPacks));
