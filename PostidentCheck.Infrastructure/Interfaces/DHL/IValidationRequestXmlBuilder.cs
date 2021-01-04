@@ -1,5 +1,4 @@
 ﻿using KeePass.Models;
-using Postident.Infrastructure.Services.DHL;
 
 namespace Postident.Infrastructure.Interfaces.DHL
 {
@@ -13,6 +12,10 @@ namespace Postident.Infrastructure.Interfaces.DHL
 
         IValidationRequestXmlBuilder Reset();
 
+        /// <summary>
+        /// Creates xml string representation of Validation request body created from provided data.
+        /// </summary>
+        /// <returns>XML <see cref="string"/> representation of request body</returns>
         string Build();
     }
 }

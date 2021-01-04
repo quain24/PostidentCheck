@@ -1,26 +1,29 @@
-﻿using Postident.Core.Enums;
-using Postident.Infrastructure.Common;
+﻿using Postident.Application.Common.Models;
+using Postident.Core.Enums;
+using Postident.Infrastructure.Interfaces;
+using Postident.Infrastructure.Interfaces.DHL;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Postident.Infrastructure.Interfaces.DHL;
 
 namespace Postident.Infrastructure.Services.DHL
 {
     public class SingleShipmentBuilder : ISingleShipmentBuilder
     {
-        private readonly ValidationRequestXmlBuilder _parentBuilder;
+        private readonly IDefaultShipmentValues _defaults;
+        private readonly IValidationRequestXmlBuilder _parentBuilder;
         private const string NotImplementedDeutschePostEndpointMsg = "Given endpoint has not been implemented in this object, cannot set up receiver data.";
 
-        public SingleShipmentBuilder(XNamespace cisNamespace, ValidationRequestXmlBuilder parentBuilder, List<XElement> shipments)
+        internal SingleShipmentBuilder(IDefaultShipmentValues defaults, XNamespace cisNamespace, IValidationRequestXmlBuilder parentBuilder, IList<XElement> shipments)
         {
+            _defaults = defaults;
             _parentBuilder = parentBuilder;
             CisNamespace = cisNamespace;
             Shipments = shipments;
         }
 
         private XNamespace CisNamespace { get; }
-        private List<XElement> Shipments { get; }
+        private IList<XElement> Shipments { get; }
         private XElement SenderData { get; set; }
         private XElement ShipmentItem { get; set; }
         private XElement ReceiverData { get; set; }
@@ -36,7 +39,7 @@ namespace Postident.Infrastructure.Services.DHL
         public ISingleShipmentBuilder SetUpId(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                throw new ArgumentOutOfRangeException(nameof(id),
+                throw new ArgumentNullException(nameof(id),
                     "ID cannot be null or empty, it has to correspond to index of the order beeing checked");
 
             Id = new XElement("sequenceNumber", id);
@@ -85,30 +88,19 @@ namespace Postident.Infrastructure.Services.DHL
         /// <summary>
         /// <inheritdoc cref="ISingleShipmentBuilder.SetUpSenderData"/>
         /// </summary>
-        /// <param name="address"><see cref="Address"/> object containing senders address and naming data</param>
+        /// <param name="address"><see cref="DataPack"/> object containing senders address and naming data</param>
         public ISingleShipmentBuilder SetUpSenderData(Address address)
         {
-            SenderData = AddressGenerator(address, "Shipper");
+            SenderData = address is not null ? AddressGenerator(address, "Shipper") : throw new ArgumentNullException(nameof(address));
             return this;
         }
 
         /// <summary>
-        /// <inheritdoc cref="ISingleShipmentBuilder.SetUpReceiverData"/>
+        /// There is different schema for address element for when type of address is "Shipper" or not
         /// </summary>
-        /// <param name="address"><see cref="Address"/> object containing receivers address and naming data</param>
-        public ISingleShipmentBuilder SetUpReceiverData(Address address)
-        {
-            _ = address ?? throw new ArgumentNullException(nameof(address));
-
-            ReceiverData = address.Street switch
-            {
-                "Packstation" => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Packstation),
-                "Postfiliale" => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Postfiliale),
-                _ => AddressGenerator(address, "Receiver")
-            };
-            return this;
-        }
-
+        /// <param name="address"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         private XElement AddressGenerator(Address address, string type)
         {
             var nameSchema = type.Equals("Shipper")
@@ -128,6 +120,23 @@ namespace Postident.Infrastructure.Services.DHL
                     )
                 )
             );
+        }
+
+        /// <summary>
+        /// <inheritdoc cref="ISingleShipmentBuilder.SetUpReceiverData"/>
+        /// </summary>
+        /// <param name="address"><see cref="DataPack"/> object containing receivers address and naming data</param>
+        public ISingleShipmentBuilder SetUpReceiverData(Address address)
+        {
+            _ = address ?? throw new ArgumentNullException(nameof(address));
+
+            ReceiverData = address.Street switch
+            {
+                "Packstation" => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Packstation),
+                "Postfiliale" => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Postfiliale),
+                _ => AddressGenerator(address, "Receiver")
+            };
+            return this;
         }
 
         private XElement SetUpDeutschePostEndpointReceiverData(Address address, DeutschePostEndpointType type)
@@ -163,6 +172,13 @@ namespace Postident.Infrastructure.Services.DHL
             );
         }
 
+        /// <summary>
+        /// <inheritdoc cref="ISingleShipmentBuilder.SetUpItemDimensions"/>
+        /// </summary>
+        /// <param name="weightInKg">Shipment weight in kilograms</param>
+        /// <param name="lengthInCm">Shipment length in centimeters</param>
+        /// <param name="widthInCm">Shipment width in centimeters</param>
+        /// <param name="heightInCm">Shipment height in centimeters</param>
         public ISingleShipmentBuilder SetUpItemDimensions(uint weightInKg, uint lengthInCm, uint widthInCm,
             uint heightInCm)
         {
@@ -203,6 +219,11 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
+        /// <summary>
+        /// <inheritdoc cref="ISingleShipmentBuilder.BuildShipment"/>
+        /// </summary>
+        /// <returns>Parent <see cref="IValidationRequestXmlBuilder"/> object</returns>
+        /// <exception cref="MissingFieldException">If one or more required properties / fields are missing</exception>
         public IValidationRequestXmlBuilder BuildShipment()
         {
             CheckValidity();
@@ -241,12 +262,12 @@ namespace Postident.Infrastructure.Services.DHL
             {
                 SetUpSenderData(new Address()
                 {
-                    City = DefaultShipmentValues.SenderCity,
-                    CountryCode = DefaultShipmentValues.SenderCountryCode,
-                    Name = DefaultShipmentValues.SenderName,
-                    Street = DefaultShipmentValues.SenderStreet,
-                    StreetNumber = DefaultShipmentValues.SenderStreetNumber,
-                    ZipCode = DefaultShipmentValues.SenderZipCode
+                    City = _defaults.SenderCity,
+                    CountryCode = _defaults.SenderCountryCode,
+                    Name = _defaults.SenderName,
+                    Street = _defaults.SenderStreet,
+                    StreetNumber = _defaults.SenderStreetNumber,
+                    ZipCode = _defaults.SenderZipCode
                 });
             }
 
@@ -254,10 +275,10 @@ namespace Postident.Infrastructure.Services.DHL
             {
                 SetUpItemDimensions
                 (
-                    DefaultShipmentValues.ShipmentWeight,
-                    DefaultShipmentValues.ShipmentLength,
-                    DefaultShipmentValues.ShipmentWidth,
-                    DefaultShipmentValues.ShipmentHeight
+                    _defaults.ShipmentWeight,
+                    _defaults.ShipmentLength,
+                    _defaults.ShipmentWidth,
+                    _defaults.ShipmentHeight
                 );
             }
 
@@ -265,10 +286,10 @@ namespace Postident.Infrastructure.Services.DHL
                 SetUpShippingDate(DateTime.Today + TimeSpan.FromDays(1));
 
             if (AccountNumber is null)
-                SetUpAccountNumber(DefaultShipmentValues.AccountNumber);
+                SetUpAccountNumber(_defaults.AccountNumber);
 
             if (ServiceType is null)
-                SetUpDhlServiceType(DefaultShipmentValues.ServiceType);
+                SetUpDhlServiceType(_defaults.ServiceType);
         }
     }
 }

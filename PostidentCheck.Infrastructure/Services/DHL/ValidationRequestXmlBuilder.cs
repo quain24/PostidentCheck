@@ -1,13 +1,21 @@
 ﻿using KeePass.Models;
+using Postident.Infrastructure.Interfaces;
+using Postident.Infrastructure.Interfaces.DHL;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Postident.Infrastructure.Interfaces.DHL;
 
 namespace Postident.Infrastructure.Services.DHL
 {
     public class ValidationRequestXmlBuilder : IValidationRequestXmlBuilder
     {
+        private readonly IDefaultShipmentValues _defaultValues;
+
+        public ValidationRequestXmlBuilder(IDefaultShipmentValues defaultValues)
+        {
+            _defaultValues = defaultValues;
+        }
+
         private XNamespace SoapEnvNamespace { get; } = "http://schemas.xmlsoap.org/soap/envelope/";
         private XNamespace CisNamespace { get; } = "http://dhl.de/webservice/cisbase";
         private XNamespace NsNamespace { get; } = "http://dhl.de/webservices/businesscustomershipping/3.0";
@@ -37,7 +45,7 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public ISingleShipmentBuilder AddNewShipment() => new SingleShipmentBuilder(CisNamespace, this, Shipments);
+        public ISingleShipmentBuilder AddNewShipment() => new SingleShipmentBuilder(_defaultValues, CisNamespace, this, Shipments);
 
         public IValidationRequestXmlBuilder Reset()
         {
@@ -48,6 +56,11 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
+        /// <summary>
+        /// <inheritdoc cref="IValidationRequestXmlBuilder.Build"/>
+        /// </summary>
+        /// <returns>XML <see cref="string"/> representation of request body</returns>
+        /// <exception cref="MissingFieldException">When one or more of required fields / properties are not set when building</exception>
         public string Build()
         {
             CheckValidity();
