@@ -40,7 +40,7 @@ namespace PostidentCheck
             try
             {
                 var mainAppInstance = ActivatorUtilities.CreateInstance<MainApp>(host.Services);
-                await mainAppInstance.Run();
+                await mainAppInstance.Run(args);
             }
             catch (Exception ex)
             {
