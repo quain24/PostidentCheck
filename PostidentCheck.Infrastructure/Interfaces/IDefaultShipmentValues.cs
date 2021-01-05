@@ -1,4 +1,6 @@
-﻿namespace Postident.Infrastructure.Interfaces
+﻿using System.Collections.Generic;
+
+namespace Postident.Infrastructure.Interfaces
 {
     public interface IDefaultShipmentValues
     {
@@ -17,5 +19,12 @@
         string SenderCity { get; }
         string SenderZipCode { get; }
         string SenderCountryCode { get; }
+        string ExportType { get; }
+        string ExportTypeDescription { get; }
+        string Description { get; }
+        uint Amount { get; }
+        double NetWeightInKG { get; }
+        double CustomsValue { get; }
+        List<string> EuCountryCodes { get; }
     }
 }

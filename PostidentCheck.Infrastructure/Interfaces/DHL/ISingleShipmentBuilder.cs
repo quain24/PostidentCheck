@@ -39,6 +39,19 @@ namespace Postident.Infrastructure.Interfaces.DHL
         ISingleShipmentBuilder SetUpReceiverData(Address address);
 
         /// <summary>
+        /// Set up a custom version of international document needed when checking parcels that will be sent to countries outside EU or when other law applies
+        /// </summary>
+        /// <param name="type">Export type ("OTHER", "PRESENT", "COMMERCIAL_SAMPLE", "DOCUMENT", "RETURN_OF_GOODS", "COMMERCIAL_GOODS")</param>
+        /// <param name="exportDescription">Description mandatory if ExportType is OTHER</param>
+        /// <param name="description">Description of the unit / position</param>
+        /// <param name="countryCode">Country's ISO-Code (ISO 3166-2)</param>
+        /// <param name="amount">Quantity of the unit / position</param>
+        /// <param name="netWeight">Net weight of the unit / position.</param>
+        /// <param name="value">Customs value amount of the unit /position.</param>
+        ISingleShipmentBuilder SetUpExportDocument(string type, string exportDescription, string description,
+            string countryCode, uint amount, double netWeight, double value);
+
+        /// <summary>
         /// You can set up custom shipment dimensions - they will be validated by online service.
         /// </summary>
         /// <param name="weightInKg">Shipment weight in kilograms</param>

@@ -4,6 +4,7 @@ using Postident.Infrastructure.Interfaces;
 using Postident.Infrastructure.Interfaces.DHL;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace Postident.Infrastructure.Services.DHL
@@ -33,6 +34,7 @@ namespace Postident.Infrastructure.Services.DHL
         private XElement ShippingDate { get; set; }
         private XElement AccountNumber { get; set; }
         private XElement ServiceType { get; set; }
+        private XElement ExportDocument { get; set; }
 
         /// <summary>
         /// <inheritdoc cref="ISingleShipmentBuilder.SetUpId"/>
@@ -176,6 +178,46 @@ namespace Postident.Infrastructure.Services.DHL
             );
         }
 
+        public ISingleShipmentBuilder SetUpExportDocument(string type, string exportDescription, string description,
+            string countryCode, uint amount, double netWeight, double value)
+        {
+            CheckExportValues(type, exportDescription, description, countryCode, amount, netWeight, value);
+
+            ExportDocument = new XElement("ExportDocument",
+                new XElement("exportType", type),
+                new XElement("exportTypeDescription", exportDescription),
+                new XElement("ExportDocPosition",
+                    new XElement("description", description),
+                    new XElement("countryCodeOrigin", countryCode),
+                    new XElement("customsTariffNumber", "123456"),
+                    new XElement("amount", amount),
+                    new XElement("netWeightInKG", netWeight),
+                    new XElement("customsValue", value)
+                )
+            );
+
+            return this;
+        }
+
+        private static void CheckExportValues(string type, string exportDescription, string description,
+            string countryCode, uint amount, double netWeight, double value)
+        {
+            var stringValueTest = new Dictionary<string, string>
+            {
+                {nameof(type), type}, {nameof(exportDescription), exportDescription}, {nameof(description), description}, {nameof(countryCode), countryCode}
+            }.FirstOrDefault(kvp => string.IsNullOrEmpty(kvp.Value));
+
+            if (!stringValueTest.Equals(default(KeyValuePair<string, string>)))
+            {
+                throw new ArgumentOutOfRangeException(nameof(stringValueTest.Key),
+                    "Given value cannot be null or empty");
+            }
+
+            if (amount == 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            if (netWeight <= 0) throw new ArgumentOutOfRangeException(nameof(netWeight));
+            if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
+        }
+
         /// <summary>
         /// <inheritdoc cref="ISingleShipmentBuilder.SetUpItemDimensions"/>
         /// </summary>
@@ -221,6 +263,7 @@ namespace Postident.Infrastructure.Services.DHL
             ShippingDate = null;
             AccountNumber = null;
             ServiceType = null;
+            ExportDocument = null;
 
             return this;
         }
@@ -248,6 +291,11 @@ namespace Postident.Infrastructure.Services.DHL
                     ReceiverData
                 )
             );
+
+            if (IsShipmentInEu() is false)
+            {
+                shipment.Element("Shipment")?.Add(ExportDocument);
+            }
 
             Shipments.Add(shipment);
             return _parentBuilder;
@@ -295,9 +343,16 @@ namespace Postident.Infrastructure.Services.DHL
 
             if (ServiceType is null)
                 SetUpDhlServiceType(IsShipmentInternational() ? _defaults.ServiceTypeInternational : _defaults.ServiceType);
+
+            if (ExportDocument is null && IsShipmentInEu() is false)
+                SetUpExportDocument(_defaults.ExportType, _defaults.ExportTypeDescription, _defaults.Description,
+                    _senderCountryCode, _defaults.Amount, _defaults.NetWeightInKG, _defaults.CustomsValue);
         }
 
         private bool IsShipmentInternational() =>
             string.Equals(_senderCountryCode, _receiverCountryCode, StringComparison.InvariantCultureIgnoreCase) is false;
+
+        private bool IsShipmentInEu() =>
+            _defaults.EuCountryCodes.Contains(_receiverCountryCode, StringComparer.InvariantCultureIgnoreCase);
     }
 }
