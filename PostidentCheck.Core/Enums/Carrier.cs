@@ -16,6 +16,7 @@
         Schenker = 7,
         DHL_Sperr = 10,
         Pick_up = 11,
+        Schenker_PL = 21,
         HES = 30,
         DPD_PL = 40
     }

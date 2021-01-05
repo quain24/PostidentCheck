@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Postident.Core.Extensions
 {
@@ -16,23 +13,23 @@ namespace Postident.Core.Extensions
         public static string RemoveMultiplicatedWhitespaces(this string longString)
         {
             _ = longString ?? throw new ArgumentNullException(nameof(longString));
-            StringBuilder sb = new StringBuilder();
-            bool lastWasSpace = true; // True to eliminate leading spaces
+            var sb = new StringBuilder();
+            var lastWasSpace = true; // True to eliminate leading spaces
 
-            for (int i = 0; i < longString.Length; i++)
+            for (var i = 0; i < longString.Length; i++)
             {
-                if (Char.IsWhiteSpace(longString[i]) && lastWasSpace)
+                if (char.IsWhiteSpace(longString[i]) && lastWasSpace)
                 {
                     continue;
                 }
 
-                lastWasSpace = Char.IsWhiteSpace(longString[i]);
+                lastWasSpace = char.IsWhiteSpace(longString[i]);
 
                 sb.Append(longString[i]);
             }
 
             // The last character might be a space
-            if (Char.IsWhiteSpace(sb[sb.Length - 1]))
+            if (char.IsWhiteSpace(sb[^1]))
             {
                 sb.Remove(sb.Length - 1, 1);
             }
