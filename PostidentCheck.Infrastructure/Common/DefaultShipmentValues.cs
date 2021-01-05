@@ -1,5 +1,6 @@
-﻿using System;
-using Postident.Infrastructure.Interfaces;
+﻿using Postident.Infrastructure.Interfaces;
+using System;
+using System.Collections.Generic;
 
 namespace Postident.Infrastructure.Common
 {
@@ -24,6 +25,13 @@ namespace Postident.Infrastructure.Common
             ShipmentLength = values.ShipmentLength;
             ShipmentWidth = values.ShipmentWidth;
             ShipmentWeight = values.ShipmentWeight;
+            ExportType = values.ExportType;
+            ExportTypeDescription = values.ExportTypeDescription;
+            Description = values.Description;
+            Amount = values.Amount;
+            NetWeightInKG = values.NetWeightInKG;
+            CustomsValue = values.CustomsValue;
+            EuCountryCodes = values.EuCountryCodes;
         }
 
         public string ServiceType { get; }
@@ -41,5 +49,12 @@ namespace Postident.Infrastructure.Common
         public string SenderCity { get; }
         public string SenderZipCode { get; }
         public string SenderCountryCode { get; }
+        public string ExportType { get; }
+        public string ExportTypeDescription { get; }
+        public string Description { get; }
+        public uint Amount { get; }
+        public double NetWeightInKG { get; }
+        public double CustomsValue { get; }
+        public List<string> EuCountryCodes { get; }
     }
 }

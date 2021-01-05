@@ -5,6 +5,22 @@
     "AccountNumber": "62203625500104",
     "AccountNumberInternational": "62203625505311",
 
+    "ExportType": "OTHER",
+    "ExportTypeDescription": "Permanent",
+    "Description": "ExportPositionOne",
+    "Amount": 1,
+    "NetWeightInKG": 0.01,
+    "CustomsValue": 1.00,
+
+    "EuCountryCodes": [
+      "BE", "EL", "LT", "PT", "BG",
+      "ES", "LU", "RO", "CZ", "FR",
+      "HU", "SI", "DK", "HR", "MT",
+      "SK", "DE", "IT", "NL", "FI",
+      "EE", "CY", "AT", "SE", "IE",
+      "LV", "PL"
+    ],
+
     "ShipmentWeight": 5,
     "ShipmentLength": 15,
     "ShipmentWidth": 15,

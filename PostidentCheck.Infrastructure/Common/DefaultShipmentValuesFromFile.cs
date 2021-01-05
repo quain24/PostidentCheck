@@ -1,4 +1,6 @@
-﻿namespace Postident.Infrastructure.Common
+﻿using System.Collections.Generic;
+
+namespace Postident.Infrastructure.Common
 {
     internal class DefaultShipmentValuesFromFile
     {
@@ -17,5 +19,12 @@
         public string SenderCity { get; set; } = string.Empty;
         public string SenderZipCode { get; set; } = string.Empty;
         public string SenderCountryCode { get; set; } = string.Empty;
+        public string ExportType { get; set; } = string.Empty;
+        public string ExportTypeDescription { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public uint Amount { get; set; }
+        public double NetWeightInKG { get; set; }
+        public double CustomsValue { get; set; }
+        public List<string> EuCountryCodes { get; set; }
     }
 }
