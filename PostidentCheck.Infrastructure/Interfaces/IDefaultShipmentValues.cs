@@ -3,7 +3,9 @@
     public interface IDefaultShipmentValues
     {
         string ServiceType { get; }
+        string ServiceTypeInternational { get; }
         string AccountNumber { get; }
+        string AccountNumberInternational { get; }
         uint ShipmentWeight { get; }
         uint ShipmentLength { get; }
         uint ShipmentWidth { get; }

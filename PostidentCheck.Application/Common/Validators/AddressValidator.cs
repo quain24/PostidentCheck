@@ -17,6 +17,10 @@ namespace Postident.Application.Common.Validators
                         $"PostIdent (\"{d.PostIdent}\") is present, but it is not a number.");
             });
 
+            RuleFor(d => d.Street)
+                .NotEmpty()
+                .WithMessage("Street name is missing");
+
             RuleFor(d => d.City)
                 .NotEmpty()
                 .WithMessage("City value is missing");
