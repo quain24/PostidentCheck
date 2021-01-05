@@ -3,7 +3,9 @@
     internal class DefaultShipmentValuesFromFile
     {
         public string ServiceType { get; set; } = string.Empty;
+        public string ServiceTypeInternational { get; set; } = string.Empty;
         public string AccountNumber { get; set; } = string.Empty;
+        public string AccountNumberInternational { get; set; } = string.Empty;
         public uint ShipmentWeight { get; set; }
         public uint ShipmentLength { get; set; }
         public uint ShipmentWidth { get; set; }

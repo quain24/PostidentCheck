@@ -1,12 +1,14 @@
 {
   "DefaultShipmentValues": {
     "ServiceType": "V01PAK",
+    "ServiceTypeInternational": "V53WPAK",
     "AccountNumber": "62203625500104",
+    "AccountNumberInternational": "62203625505311",
 
     "ShipmentWeight": 5,
-    "ShipmentLength": 10,
-    "ShipmentWidth": 10,
-    "ShipmentHeight": 10,
+    "ShipmentLength": 15,
+    "ShipmentWidth": 15,
+    "ShipmentHeight": 15,
 
     "ReceiverName": "Name",
 

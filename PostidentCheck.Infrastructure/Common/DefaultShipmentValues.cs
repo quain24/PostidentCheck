@@ -10,6 +10,8 @@ namespace Postident.Infrastructure.Common
             _ = values ?? throw new ArgumentNullException(nameof(values));
             SenderCity = values.SenderCity;
             AccountNumber = values.AccountNumber;
+            AccountNumberInternational = values.AccountNumberInternational;
+
             ReceiverName = values.ReceiverName;
             SenderCountryCode = values.SenderCountryCode;
             SenderName = values.SenderName;
@@ -17,6 +19,7 @@ namespace Postident.Infrastructure.Common
             SenderStreetNumber = values.SenderStreetNumber;
             SenderZipCode = values.SenderZipCode;
             ServiceType = values.ServiceType;
+            ServiceTypeInternational = values.ServiceTypeInternational;
             ShipmentHeight = values.ShipmentHeight;
             ShipmentLength = values.ShipmentLength;
             ShipmentWidth = values.ShipmentWidth;
@@ -24,7 +27,9 @@ namespace Postident.Infrastructure.Common
         }
 
         public string ServiceType { get; }
+        public string ServiceTypeInternational { get; }
         public string AccountNumber { get; }
+        public string AccountNumberInternational { get; }
         public uint ShipmentWeight { get; }
         public uint ShipmentLength { get; }
         public uint ShipmentWidth { get; }
