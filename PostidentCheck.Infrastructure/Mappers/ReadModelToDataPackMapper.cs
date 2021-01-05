@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Postident.Application.Common.Interfaces;
 using Postident.Application.Common.Models;
 using Postident.Core.Entities;
 using Postident.Infrastructure.Common;
@@ -6,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Postident.Application.Common.Interfaces;
 
 namespace Postident.Infrastructure.Mappers
 {
@@ -27,7 +27,7 @@ namespace Postident.Infrastructure.Mappers
         }
 
         private DefaultNamingMap NamingMap { get; }
-        private readonly Regex _splitAddressRegex = new(@"^([\w\.\-\, ]+) ([0-9]{1,5})\s?([\w\.\-/]*)$");
+        private readonly Regex _splitAddressRegex = new(@"^(?<street>[\S ]+?)\s*(?<number>\d+\s*[a-zA-Z]*\s*([-\/]\s*\d*\s*\w?\s*)*)$");
 
         /// <summary>
         /// <inheritdoc cref="IReadModelToDataPackMapper.Map(DataPackReadModel)"/>
@@ -63,8 +63,15 @@ namespace Postident.Infrastructure.Mappers
         /// <param name="dataPackReadModels">Entities from database</param>
         /// <returns>Collection of <see cref="DataPack"/> created from provided <paramref name="dataPackReadModels"/></returns>
         /// <exception cref="ArgumentNullException">When trying to map <see langword="null"/></exception>
-        public IEnumerable<DataPack> Map(IEnumerable<DataPackReadModel> dataPackReadModels) =>
-            dataPackReadModels?.Select(this.Map) ?? throw new ArgumentNullException(nameof(dataPackReadModels));
+        public IEnumerable<DataPack> Map(IEnumerable<DataPackReadModel> dataPackReadModels)
+        {
+            var output = new List<DataPack>(dataPackReadModels.Count());
+            foreach (var entry in dataPackReadModels)
+            {
+                output.Add(Map(entry));
+            }
+            return output;
+        }
 
         /// <summary>
         /// Tries to split provided street and street number from one string into separate ones
@@ -73,24 +80,25 @@ namespace Postident.Infrastructure.Mappers
         /// <returns><see cref="ValueTuple"/> containing street name and street number</returns>
         private (string street, string number) SplitStreet(DataPackReadModel dataPack)
         {
-            var result = _splitAddressRegex.Match(dataPack.Street.Trim());
+            if (string.IsNullOrWhiteSpace(dataPack.Street))
+            {
+                return (string.Empty, string.Empty);
+            }
+
+            var streetData = dataPack.Street.Trim();
+            var result = _splitAddressRegex.Match(streetData);
             if (!result.Success || result.Groups.Count == 1)
             {
-                _logger?.LogWarning("{0}: ID: {1} - could not split street into separate name and number - mapping as street without number.", Name, dataPack.Id);
-                return (dataPack.Street.Trim(), string.Empty);
+                _logger?.LogWarning("{0}: ID: {1} - could not split street into separate name and number" +
+                    " - mapping as street without number.", Name, dataPack.Id);
+                return (streetData, string.Empty);
             }
 
-            var streetMatch = NamingMap is not null && NamingMap.TryGetDefaultNameFor(result.Groups[1].Value.Trim(), out var mappedName) ?
+            var streetMatch = NamingMap is not null && NamingMap.TryGetDefaultNameFor(result.Groups["street"].Value.Trim(), out var mappedName) ?
                 mappedName :
-                result.Groups[1].Value.Trim();
+                result.Groups["street"].Value.Trim();
 
-            var numberMatch = string.Empty;
-
-            // 0 is whole match, 1 is street name, so start from 2
-            for (var i = 2; i < result.Groups.Count; i++)
-            {
-                numberMatch += result.Groups[i].Value.Trim();
-            }
+            var numberMatch = result.Groups["number"].Value;
 
             return (streetMatch, numberMatch);
         }
