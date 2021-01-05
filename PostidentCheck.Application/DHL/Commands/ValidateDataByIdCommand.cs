@@ -58,7 +58,31 @@ namespace Postident.Application.DHL.Commands
 
             var mappedData = _mapper.Map(dataToValidate);
 
+            mappedData.ToList().ForEach(m =>
+            {
+                Console.WriteLine("======================================================");
+                Console.WriteLine("Id: " + m.Id);
+                Console.WriteLine("Carrier: " + m.Carrier);
+                Console.WriteLine("Check status: " + m.DataPackChecked);
+                Console.WriteLine("City: " + m.Address.City);
+                Console.WriteLine("Country: " + m.Address.CountryCode);
+                Console.WriteLine("Postident: " + m.Address.PostIdent);
+                Console.WriteLine("Street: " + m.Address.Street);
+                Console.WriteLine("Street nr: " + m.Address.StreetNumber);
+                Console.WriteLine("ZipCode: " + m.Address.ZipCode);
+                Console.WriteLine("======================================================");
+            });
+
             var results = await _validationService.Validate(mappedData, cancellationToken);
+
+            results.ToList().OrderBy(r => r.Id).ToList().ForEach(r =>
+            {
+                Console.WriteLine("======================================================");
+                Console.WriteLine("Check status: " + r.CheckStatus);
+                Console.WriteLine("ID: " + r.Id);
+                Console.WriteLine("Message: " + r.Message);
+                Console.WriteLine("======================================================");
+            });
 
             return await UpdateDatabase(results);
         }

@@ -60,6 +60,15 @@ namespace Postident.Application.DHL.Commands
 
             var results = await _validationService.Validate(mappedData, cancellationToken);
 
+            results.ToList().OrderBy(r => r.Id).ToList().ForEach(r =>
+            {
+                Console.WriteLine("======================================================");
+                Console.WriteLine("Check status: " + r.CheckStatus);
+                Console.WriteLine("ID: " + r.Id);
+                Console.WriteLine("Message: " + r.Message);
+                Console.WriteLine("======================================================");
+            });
+
             return await UpdateDatabase(results);
         }
 
