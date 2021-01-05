@@ -42,7 +42,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         {
             var message = DhlResponseFixtures.ProperResponseDualInfoString();
 
-            var actual = await Deserializer.Deserialize(new HttpResponseMessage() {Content = new StringContent(message)});
+            var actual = await Deserializer.Deserialize(new HttpResponseMessage() { Content = new StringContent(message) });
 
             Assert.True(actual.Responses.Count == 2);
         }
@@ -51,7 +51,8 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
             new List<object[]>
             {
                 new object[] {DhlResponseFixtures.MajorXmlErrorResponse()},
-                new object[] {DhlResponseFixtures.MajorXmlErrorCountry()}
+                new object[] {DhlResponseFixtures.MajorXmlErrorCountry()},
+                new object[] {DhlResponseFixtures.WrongLoginResponse() }
             };
 
         [Theory]
