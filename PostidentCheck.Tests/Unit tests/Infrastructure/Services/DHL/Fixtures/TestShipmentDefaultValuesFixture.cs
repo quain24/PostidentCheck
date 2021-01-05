@@ -1,4 +1,5 @@
 ﻿using Postident.Infrastructure.Common;
+using System.Collections.Generic;
 
 namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures
 {
@@ -9,6 +10,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures
             return new DefaultShipmentValues(new DefaultShipmentValuesFromFile()
             {
                 AccountNumber = "12345678901234",
+                AccountNumberInternational = "43210987654321",
                 ReceiverName = "Test receiver name",
                 SenderCity = "Sender city name",
                 SenderCountryCode = "de",
@@ -20,7 +22,19 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures
                 ShipmentHeight = 1,
                 ShipmentLength = 2,
                 ShipmentWeight = 3,
-                ShipmentWidth = 4
+                ShipmentWidth = 4,
+                Amount = 1,
+                CustomsValue = 1,
+                Description = "Description",
+                EuCountryCodes = new List<string>()
+                {
+                    "BE", "EL", "LT", "PT", "BG", "ES", "LU", "RO", "CZ", "FR", "HU", "SI", "DK", "HR", "MT", "SK",
+                    "DE", "IT", "NL", "FI", "EE", "CY", "AT", "SE", "IE", "LV", "PL"
+                },
+                ExportType = "OTHER",
+                ExportTypeDescription = "ExportTypeDescription",
+                NetWeightInKG = 0.01,
+                ServiceTypeInternational = "DHLINT"
             });
         }
     }

@@ -33,7 +33,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
             };
 
             var actual = Validator.Validate(data);
-
+            Output.WriteLine(data.ToString());
             Assert.True(actual.IsValid);
         }
 
@@ -52,7 +52,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
             };
 
             var actual = Validator.Validate(data);
-
+            Output.WriteLine(data.ToString());
             Assert.True(actual.IsValid);
         }
 
@@ -134,11 +134,31 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
             Output.WriteLine(actual.CombinedErrors());
         }
 
+        [Fact]
+        public void Invalid_if_street_is_missing()
+        {
+            var data = new Address()
+            {
+                City = "Poznań",
+                CountryCode = "pl",
+                Name = "Adam Nowak",
+                PostIdent = "123456",
+                Street = "",
+                StreetNumber = "32A",
+                ZipCode = "11235"
+            };
+
+            var actual = Validator.Validate(data);
+
+            Assert.False(actual.IsValid);
+            Output.WriteLine(actual.CombinedErrors());
+        }
+
         [Theory]
         [InlineData("00")]
         [InlineData("12")]
-        [InlineData("1234561")]
-        [InlineData("12345662")]
+        [InlineData("123456122")]
+        [InlineData("12345662222")]
         public void Invalid_if_zipcode_is_not_correct_length(string zip)
         {
             var data = new Address()

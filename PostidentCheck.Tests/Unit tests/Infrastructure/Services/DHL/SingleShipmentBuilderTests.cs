@@ -34,7 +34,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 .SetUpReceiverData(new Address
                 {
                     City = "a",
-                    CountryCode = "dd",
+                    CountryCode = "de",
                     Name = "a",
                     PostIdent = "123456",
                     Street = "a",
@@ -62,7 +62,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 .SetUpReceiverData(new Address
                 {
                     City = "a",
-                    CountryCode = "dd",
+                    CountryCode = "de",
                     Name = "a",
                     PostIdent = "123456",
                     Street = "a",
@@ -77,7 +77,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 .SetUpReceiverData(new Address
                 {
                     City = "b",
-                    CountryCode = "dd",
+                    CountryCode = "de",
                     Name = "b",
                     PostIdent = "123456",
                     Street = "b",

@@ -18,7 +18,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         }
 
         [Fact]
-        public void Builds_xml_from_proper_data()
+        public void Builds_xml_from_proper_data_domestic()
         {
             var builder = new ValidationRequestXmlBuilder(TestShipmentDefaultValuesFixture.Defaults());
 
@@ -29,7 +29,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 .SetUpReceiverData(new Address
                 {
                     City = "a",
-                    CountryCode = "dd",
+                    CountryCode = "de",
                     Name = "a",
                     PostIdent = "123456",
                     Street = "a",
@@ -40,7 +40,59 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 .Build();
 
             Output.WriteLine(result);
-            Assert.Equal(RawXmlDataFixtures.TestValidationXmlRequest(), result);
+            Assert.Equal(RawXmlDataFixtures.TestValidationXmlDomesticRequest(), result);
+        }
+
+        [Fact]
+        public void Builds_xml_from_proper_data_international_eu()
+        {
+            var builder = new ValidationRequestXmlBuilder(TestShipmentDefaultValuesFixture.Defaults());
+
+            var result = builder.SetUpAuthorization(new Secret() { Password = "pass", Username = "usr", Id = "1" })
+                .AddNewShipment()
+                .SetUpId("123")
+                .SetUpShippingDate(new DateTime(3000, 1, 1))
+                .SetUpReceiverData(new Address
+                {
+                    City = "a",
+                    CountryCode = "AT",
+                    Name = "a",
+                    PostIdent = "123456",
+                    Street = "a",
+                    StreetNumber = "1",
+                    ZipCode = "12345"
+                })
+                .BuildShipment()
+                .Build();
+
+            Output.WriteLine(result);
+            Assert.Equal(RawXmlDataFixtures.TestValidationXmlForeignInEuRequest(), result);
+        }
+
+        [Fact]
+        public void Builds_xml_from_proper_data_international_outside_eus()
+        {
+            var builder = new ValidationRequestXmlBuilder(TestShipmentDefaultValuesFixture.Defaults());
+
+            var result = builder.SetUpAuthorization(new Secret() { Password = "pass", Username = "usr", Id = "1" })
+                .AddNewShipment()
+                .SetUpId("123")
+                .SetUpShippingDate(new DateTime(3000, 1, 1))
+                .SetUpReceiverData(new Address
+                {
+                    City = "a",
+                    CountryCode = "CN",
+                    Name = "a",
+                    PostIdent = "123456",
+                    Street = "a",
+                    StreetNumber = "1",
+                    ZipCode = "12345"
+                })
+                .BuildShipment()
+                .Build();
+
+            Output.WriteLine(result);
+            Assert.Equal(RawXmlDataFixtures.TestValidationXmlForeignOutsideEu(), result);
         }
 
         [Fact]

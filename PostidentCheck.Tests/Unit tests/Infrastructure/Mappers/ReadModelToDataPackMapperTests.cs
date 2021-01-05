@@ -56,7 +56,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Mappers
                         Id = "3", PostIdent = "",
                         Street = "Hammeltrift 32 A",
                         ZipCode = "123456"
-                    }, "Hammeltrift", "32A","Lippstadt","DE",Carrier.DHL,InfoPackCheckStatus.Unchecked,"3","","123456"},
+                    }, "Hammeltrift", "32 A","Lippstadt","DE",Carrier.DHL,InfoPackCheckStatus.Unchecked,"3","","123456"},
                 new object[] {
                     new DataPackReadModel
                     {
@@ -154,7 +154,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Mappers
                         Id = "3", PostIdent = "",
                         Street = "Hammeltrift    32 A1",
                         ZipCode = "123456"
-                    }, "Hammeltrift", "32A1","Lippstadt","DE",Carrier.DHL,InfoPackCheckStatus.Unchecked,"3","","123456"},
+                    }, "Hammeltrift    32 A", "1","Lippstadt","DE",Carrier.DHL,InfoPackCheckStatus.Unchecked,"3","","123456"},
                 new object[] {
                     new DataPackReadModel
                     {
