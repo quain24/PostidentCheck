@@ -21,5 +21,11 @@
         /// 2-3 letter euro country code (DE)
         /// </summary>
         public string CountryCode { get; init; } = string.Empty;
+
+        public override string ToString()
+        {
+            return $"{Name} - {CountryCode} - {ZipCode} {City}, {Street} {StreetNumber}."
+                   + (string.IsNullOrEmpty(PostIdent) ? string.Empty : $" (Postident: {PostIdent})");
+        }
     }
 }
