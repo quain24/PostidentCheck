@@ -10,9 +10,11 @@ namespace Postident.Infrastructure.Services.DHL
 {
     public class SingleShipmentBuilder : ISingleShipmentBuilder
     {
+        private const string NotImplementedDeutschePostEndpointMsg = "Given endpoint has not been implemented in this object, cannot set up receiver data.";
         private readonly IDefaultShipmentValues _defaults;
         private readonly IValidationRequestXmlBuilder _parentBuilder;
-        private const string NotImplementedDeutschePostEndpointMsg = "Given endpoint has not been implemented in this object, cannot set up receiver data.";
+        private string _senderCountryCode = string.Empty;
+        private string _receiverCountryCode = string.Empty;
 
         internal SingleShipmentBuilder(IDefaultShipmentValues defaults, XNamespace cisNamespace, IValidationRequestXmlBuilder parentBuilder, IList<XElement> shipments)
         {
@@ -92,6 +94,7 @@ namespace Postident.Infrastructure.Services.DHL
         public ISingleShipmentBuilder SetUpSenderData(Address address)
         {
             SenderData = address is not null ? AddressGenerator(address, "Shipper") : throw new ArgumentNullException(nameof(address));
+            _senderCountryCode = address.CountryCode;
             return this;
         }
 
@@ -136,6 +139,7 @@ namespace Postident.Infrastructure.Services.DHL
                 "Postfiliale" => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Postfiliale),
                 _ => AddressGenerator(address, "Receiver")
             };
+            _receiverCountryCode = address.CountryCode;
             return this;
         }
 
@@ -210,7 +214,9 @@ namespace Postident.Infrastructure.Services.DHL
         {
             Id = null;
             ReceiverData = null;
+            _receiverCountryCode = string.Empty;
             SenderData = null;
+            _senderCountryCode = string.Empty;
             ShipmentItem = null;
             ShippingDate = null;
             AccountNumber = null;
@@ -244,7 +250,6 @@ namespace Postident.Infrastructure.Services.DHL
             );
 
             Shipments.Add(shipment);
-
             return _parentBuilder;
         }
 
@@ -286,10 +291,13 @@ namespace Postident.Infrastructure.Services.DHL
                 SetUpShippingDate(DateTime.Today + TimeSpan.FromDays(1));
 
             if (AccountNumber is null)
-                SetUpAccountNumber(_defaults.AccountNumber);
+                SetUpAccountNumber(IsShipmentInternational() ? _defaults.AccountNumberInternational : _defaults.AccountNumber);
 
             if (ServiceType is null)
-                SetUpDhlServiceType(_defaults.ServiceType);
+                SetUpDhlServiceType(IsShipmentInternational() ? _defaults.ServiceTypeInternational : _defaults.ServiceType);
         }
+
+        private bool IsShipmentInternational() =>
+            string.Equals(_senderCountryCode, _receiverCountryCode, StringComparison.InvariantCultureIgnoreCase) is false;
     }
 }

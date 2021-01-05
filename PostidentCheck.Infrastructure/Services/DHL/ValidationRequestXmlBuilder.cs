@@ -83,7 +83,7 @@ namespace Postident.Infrastructure.Services.DHL
                 )
             ));
 
-            // DHL specific encoding
+            // DHL specific encoding            
             return soapRequest.ToString().Replace(";", "%3B");
         }
 
