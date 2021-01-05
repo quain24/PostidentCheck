@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Postident.Application.Common.Extensions;
 using Postident.Application.Common.Interfaces;
+using Postident.Application.Common.Models;
 using Postident.Core.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,11 +12,11 @@ using System.Threading.Tasks;
 
 namespace Postident.Application.DHL.Commands
 {
-    public class ValidateAllDataCommand : IRequest<bool>
+    public class ValidateAllDataCommand : IRequest<CommandResult<int>>
     {
     }
 
-    public class ValidateAllDataCommandHandler : IRequestHandler<ValidateAllDataCommand, bool>
+    public class ValidateAllDataCommandHandler : IRequestHandler<ValidateAllDataCommand, CommandResult<int>>
     {
         private const string Name = "Validation Command handler";
         private readonly IDataPackReadRepository _readRepository;
@@ -36,9 +38,9 @@ namespace Postident.Application.DHL.Commands
             _logger = logger;
         }
 
-        public async Task<bool> Handle(ValidateAllDataCommand request, CancellationToken cancellationToken)
+        public async Task<CommandResult<int>> Handle(ValidateAllDataCommand request, CancellationToken cancellationToken)
         {
-            _logger?.LogInformation("{0}: Trying to validate all possible information from db...", Name);
+            using var scope = _logger?.BeginScope(Name);
             var dataToValidate = await RetrieveReadModels(cancellationToken).ConfigureAwait(false);
 
             if (dataToValidate is null)
@@ -47,18 +49,9 @@ namespace Postident.Application.DHL.Commands
                 return NoDataPacksToCheck();
 
             var mappedData = _mapper.Map(dataToValidate);
+            var results = (await _validationService.Validate(mappedData, cancellationToken)).ToList();
 
-            var results = await _validationService.Validate(mappedData, cancellationToken);
-
-            results.ToList().OrderBy(r => r.Id).ToList().ForEach(r =>
-            {
-                Console.WriteLine("======================================================");
-                Console.WriteLine("Check status: " + r.CheckStatus);
-                Console.WriteLine("ID: " + r.Id);
-                Console.WriteLine("Message: " + r.Message);
-                Console.WriteLine("======================================================");
-            });
-
+            _logger.LogWriteModel(results);
             return await UpdateDatabase(results);
         }
 
@@ -66,39 +59,40 @@ namespace Postident.Application.DHL.Commands
         {
             try
             {
+                _logger?.LogInformation("{0}: Trying to validate all possible information from db...", Name);
                 return await _readRepository.GetDataPacks(token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "{0}: Could not get data from database, exception has occurred - ending command", Name);
-                return new List<DataPackReadModel>();
+                return null;
             }
         }
 
-        private static bool DatabaseErrorOccurred() => false; // method added for readability
+        private static CommandResult<int> DatabaseErrorOccurred() => CommandResult<int>.InvalidResult(-1, "Database error");
 
-        private bool NoDataPacksToCheck()
+        private CommandResult<int> NoDataPacksToCheck()
         {
-            _logger?.LogInformation("{0}: Database query returned no parcels to be check - ending command", Name);
-            return true;
+            _logger?.LogInformation("{0}: Database query returned no data to be check", Name);
+            return CommandResult<int>.ValidResult(0, "Database query returned no data to be check");
         }
 
-        private async Task<bool> UpdateDatabase(IEnumerable<InfoPackWriteModel> data)
+        private async Task<CommandResult<int>> UpdateDatabase(ICollection<InfoPackWriteModel> data)
         {
             try
             {
-                var updatedParcelsAmount = await _writeContext.SaveChangesAsync(data);
+                var updatedDataPacksAmount = await _writeContext.SaveChangesAsync(data).ConfigureAwait(false);
 
-                if (updatedParcelsAmount > 0)
-                    _logger?.LogInformation("{0}: Database updated successfully, updated {1} element(s).", Name, updatedParcelsAmount);
+                if (updatedDataPacksAmount > 0)
+                    _logger?.LogInformation("{0}: Database updated successfully, updated {1}/{2} element(s).", Name, updatedDataPacksAmount, data.Count);
                 else
                     _logger?.LogInformation("{0}: No informations were updated in database.", Name);
-                return true;
+                return CommandResult<int>.ValidResult(updatedDataPacksAmount, $"Database updated successfully, updated {updatedDataPacksAmount} element(s).");
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "{0}: Updating database failed - exception was thrown", Name);
-                return false;
+                return CommandResult<int>.InvalidResult(-1, "Updating database failed - exception was thrown");
             }
         }
     }

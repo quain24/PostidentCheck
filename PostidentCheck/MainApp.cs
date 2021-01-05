@@ -3,14 +3,10 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Postident.Application.DHL.Commands;
 using Postident.Infrastructure.Common;
-using PostidentCheck.Services;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Postident.Core.Enums;
 
 namespace PostidentCheck
 {
@@ -38,13 +34,13 @@ namespace PostidentCheck
                     {
                         var carriers = string.Join(", ", o.Carriers);
                         _logger?.LogInformation("Checking data that belongs to selected carriers: --Carrier {0}", carriers);
-                        await _mediator.Send(new ValidateDataByCarrierCommand(o.Carriers));
+                        await _mediator.Send(new ValidateDataByCarrierCommand(o.Carriers.ToArray()));
                     }
                     else if (o.Ids.Any())
                     {
                         var ids = string.Join(", ", o.Ids);
                         _logger?.LogInformation("Checking data with selected ID's: --Id {0}", ids);
-                        await _mediator.Send(new ValidateDataByIdCommand(o.Ids));
+                        await _mediator.Send(new ValidateDataByIdCommand(o.Ids.ToArray()));
                     }
                     else if (o.CheckAll)
                     {
