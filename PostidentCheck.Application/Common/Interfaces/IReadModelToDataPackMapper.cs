@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Postident.Application.Common.Models;
+﻿using Postident.Application.Common.Models;
 using Postident.Core.Entities;
+using System;
+using System.Collections.Generic;
 
 namespace Postident.Application.Common.Interfaces
 {

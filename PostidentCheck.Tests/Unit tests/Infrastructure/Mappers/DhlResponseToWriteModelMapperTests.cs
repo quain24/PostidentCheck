@@ -1,12 +1,11 @@
-﻿using System;
-using Postident.Application.DHL;
+﻿using Postident.Application.DHL;
 using Postident.Core.Enums;
 using Postident.Infrastructure.Mappers;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Postident.Tests.Unit_tests.Infrastructure.Mappers
 {

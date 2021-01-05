@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Postident.Application.Common.Models;
+using Postident.Core.Entities;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Postident.Application.Common.Models;
-using Postident.Core.Entities;
 
 namespace Postident.Application.Common.Interfaces
 {

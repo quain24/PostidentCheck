@@ -157,7 +157,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
                     PostIdent = "AA123456789",
                     ZipCode = "65888"
                 },
-                DataPackChecked = (InfoPackCheckStatus) 33,
+                DataPackChecked = (InfoPackCheckStatus)33,
                 Id = "12345"
             };
 

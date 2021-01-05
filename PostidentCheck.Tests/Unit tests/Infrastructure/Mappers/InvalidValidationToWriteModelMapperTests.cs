@@ -1,6 +1,6 @@
-﻿using System;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using Postident.Infrastructure.Mappers;
+using System;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,7 +23,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Mappers
         {
             var data = new ValidationResult()
             {
-                Errors = {new ValidationFailure("Any prop", "test error message")}
+                Errors = { new ValidationFailure("Any prop", "test error message") }
             };
 
             var actual = Mapper.MapInvalidResult(data, "1");

@@ -136,7 +136,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services
                 mocker.GetMock<IInvalidValidationToWriteModelMapper<InfoPackWriteModel>>().Object,
                 Output.BuildLoggerFor<OfflineDataPackValidationService>());
 
-            var result = test.FilterOutInvalidDataPacksFrom(new List<DataPack>(){new DataPack(), new DataPack(), new DataPack()}, out var invalids);
+            var result = test.FilterOutInvalidDataPacksFrom(new List<DataPack>() { new DataPack(), new DataPack(), new DataPack() }, out var invalids);
 
             Assert.Empty(result);
             Assert.Empty(invalids);

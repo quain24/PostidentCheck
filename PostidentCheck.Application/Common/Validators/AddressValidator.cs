@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.Results;
 using Postident.Application.Common.Models;
+using System.Linq;
 
 namespace Postident.Application.Common.Validators
 {
@@ -37,7 +37,6 @@ namespace Postident.Application.Common.Validators
                     .Length(3, 8)
                     .WithMessage(d => $"Zip code ({d.ZipCode}) length is not valid (3 - 8 chars)");
             });
-
         }
 
         protected override bool PreValidate(ValidationContext<Address> context, ValidationResult result)

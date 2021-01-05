@@ -1,9 +1,9 @@
-﻿using System;
-using System.Globalization;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Postident.Application.Common.Interfaces;
 using Postident.Core.Entities;
 using Postident.Core.Enums;
+using System;
+using System.Globalization;
 
 namespace Postident.Tests.Integration_tests.Fixtures
 {

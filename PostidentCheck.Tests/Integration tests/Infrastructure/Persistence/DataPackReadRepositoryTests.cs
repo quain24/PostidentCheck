@@ -2,10 +2,8 @@
 using Postident.Infrastructure.Persistence;
 using Postident.Tests.Integration_tests.Fixtures;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Postident.Core.Entities;
 using Xunit;
 
 namespace Postident.Tests.Integration_tests.Infrastructure.Persistence
