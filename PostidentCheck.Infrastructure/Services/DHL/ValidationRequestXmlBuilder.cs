@@ -4,6 +4,7 @@ using Postident.Infrastructure.Interfaces.DHL;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Postident.Application.Common.Models;
 
 namespace Postident.Infrastructure.Services.DHL
 {
@@ -24,12 +25,12 @@ namespace Postident.Infrastructure.Services.DHL
         private XElement ApiVersionModule { get; set; }
         private List<XElement> Shipments { get; set; } = new();
 
-        public IValidationRequestXmlBuilder SetUpAuthorization(Secret secret)
+        public IValidationRequestXmlBuilder SetUpAuthorization(string username, string password)
         {
             AuthorizationModule = new XElement(SoapEnvNamespace + "Header",
                 new XElement(CisNamespace + "Authentification",
-                    new XElement(CisNamespace + "user", secret.Username),
-                    new XElement(CisNamespace + "signature", secret.Password)
+                    new XElement(CisNamespace + "user", username),
+                    new XElement(CisNamespace + "signature", password)
                 )
             );
             return this;
@@ -45,7 +46,7 @@ namespace Postident.Infrastructure.Services.DHL
             return this;
         }
 
-        public ISingleShipmentBuilder AddNewShipment() => new SingleShipmentBuilder(_defaultValues, CisNamespace, this, Shipments);
+        public ISingleShipmentBuilder AddNewShipment(string id, Address receiverAddress) => new SingleShipmentBuilder(id, receiverAddress, _defaultValues, CisNamespace, this, Shipments);
 
         public IValidationRequestXmlBuilder Reset()
         {

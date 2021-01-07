@@ -13,6 +13,6 @@ namespace Postident.Infrastructure.Services.DHL
             _defaultShipmentValues = defaultShipmentValues ?? throw new ArgumentNullException(nameof(defaultShipmentValues));
         }
 
-        public ValidationRequestXmlBuilder CreateInstance() => new(_defaultShipmentValues);
+        public IValidationRequestXmlBuilder CreateInstance() => new ValidationRequestXmlBuilder(_defaultShipmentValues);
     }
 }

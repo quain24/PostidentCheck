@@ -17,12 +17,15 @@ namespace Postident.Infrastructure.Services.DHL
         private string _senderCountryCode = string.Empty;
         private string _receiverCountryCode = string.Empty;
 
-        internal SingleShipmentBuilder(IDefaultShipmentValues defaults, XNamespace cisNamespace, IValidationRequestXmlBuilder parentBuilder, IList<XElement> shipments)
+        internal SingleShipmentBuilder(string id, Address receiverAddress, IDefaultShipmentValues defaults, XNamespace cisNamespace, IValidationRequestXmlBuilder parentBuilder, IList<XElement> shipments)
         {
             _defaults = defaults;
             _parentBuilder = parentBuilder;
             CisNamespace = cisNamespace;
             Shipments = shipments;
+
+            SetUpId(id);
+            SetUpReceiverData(receiverAddress);
         }
 
         private XNamespace CisNamespace { get; }
@@ -35,6 +38,7 @@ namespace Postident.Infrastructure.Services.DHL
         private XElement AccountNumber { get; set; }
         private XElement ServiceType { get; set; }
         private XElement ExportDocument { get; set; }
+        private XElement AdditionalService { get; set; }
 
         /// <summary>
         /// <inheritdoc cref="ISingleShipmentBuilder.SetUpId"/>
@@ -137,8 +141,8 @@ namespace Postident.Infrastructure.Services.DHL
 
             ReceiverData = address.Street switch
             {
-                "Packstation" => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Packstation),
-                "Postfiliale" => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Postfiliale),
+                var o when o.Equals("Packstation", StringComparison.InvariantCultureIgnoreCase) => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Packstation),
+                var o when o.Equals("Postfiliale", StringComparison.InvariantCultureIgnoreCase) => SetUpDeutschePostEndpointReceiverData(address, DeutschePostEndpointType.Postfiliale),
                 _ => AddressGenerator(address, "Receiver")
             };
             _receiverCountryCode = address.CountryCode;
@@ -264,6 +268,7 @@ namespace Postident.Infrastructure.Services.DHL
             AccountNumber = null;
             ServiceType = null;
             ExportDocument = null;
+            AdditionalService = null;
 
             return this;
         }
@@ -285,17 +290,14 @@ namespace Postident.Infrastructure.Services.DHL
                         ServiceType,
                         AccountNumber,
                         ShippingDate,
-                        ShipmentItem
+                        ShipmentItem,
+                        AdditionalService
                     ),
                     SenderData,
-                    ReceiverData
+                    ReceiverData,
+                    ExportDocument
                 )
             );
-
-            if (IsShipmentInEu() is false)
-            {
-                shipment.Element("Shipment")?.Add(ExportDocument);
-            }
 
             Shipments.Add(shipment);
             return _parentBuilder;
@@ -347,6 +349,22 @@ namespace Postident.Infrastructure.Services.DHL
             if (ExportDocument is null && IsShipmentInEu() is false)
                 SetUpExportDocument(_defaults.ExportType, _defaults.ExportTypeDescription, _defaults.Description,
                     _senderCountryCode, _defaults.Amount, _defaults.NetWeightInKG, _defaults.CustomsValue);
+
+            if (AdditionalService is null && IsShipmentInternational())
+                SetUpAdditionalServices();
+        }
+
+        /// <summary>
+        /// Will add additional service parameter to international shipping, so the api wont report</br>
+        /// that a return policy / Service Vorausverfügung needs to be set for international addresses
+        /// </summary>
+        private ISingleShipmentBuilder SetUpAdditionalServices()
+        {
+            AdditionalService = new XElement("Service",
+                new XElement("Endorsement", new XAttribute("active", "1"), new XAttribute("type", "IMMEDIATE"))
+                );
+
+            return this;
         }
 
         private bool IsShipmentInternational() =>

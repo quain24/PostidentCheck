@@ -34,8 +34,8 @@ namespace Postident.Infrastructure.Services.DHL
         : base(ServiceName, serializer, logger)
         {
             _xmlRequestBuilderFactory = xmlRequestBuilderFactory ?? throw new ArgumentNullException(nameof(xmlRequestBuilderFactory));
-            _logger = logger;
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _logger = logger;
 
             Client = httpFactory.CreateClient("DHL PostIdent");
             QueriesPerSecond = _configuration.MaxQueriesPerSecond;
@@ -77,13 +77,10 @@ namespace Postident.Infrastructure.Services.DHL
 
         private HttpRequestMessage CreateCombinedRequestFrom(IEnumerable<DataPack> dataPacks, Secret secret)
         {
-            var builder = _xmlRequestBuilderFactory.CreateInstance().SetUpAuthorization(secret);
+            var builder = _xmlRequestBuilderFactory.CreateInstance().SetUpAuthorization(secret.Username, secret.Password);
             dataPacks.ToList().ForEach(d =>
             {
-                builder.AddNewShipment()
-                    .SetUpId(d.Id)
-                    .SetUpReceiverData(d.Address)
-                    .BuildShipment();
+                builder.AddNewShipment(d.Id, d.Address).BuildShipment();
             });
 
             return new HttpRequestMessage(HttpMethod.Post, string.Empty)

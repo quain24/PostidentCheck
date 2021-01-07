@@ -78,7 +78,7 @@ namespace Postident.Infrastructure.Services
                     validApiResponses.Add(response);
                 else
                 {
-                    _logger?.LogWarning("{0}: One of responses contained no necessary information - logging info and purging: Error code: {1} || Message: {2}",
+                    _logger?.LogError("{0}: One of responses contained no necessary information - logging info and purging: Error code: {1} || Message: {2}",
                         Name, response.MainFaultCode ?? "---", response.MainFaultText ?? "---");
                 }
             }
