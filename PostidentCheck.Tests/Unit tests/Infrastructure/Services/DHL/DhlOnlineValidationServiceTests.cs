@@ -29,6 +29,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
             Output = output;
             MockerSetup();
         }
+
         private ITestOutputHelper Output { get; }
         private AutoMocker Mocker { get; set; }
         private HttpResponseMessage Response { get; set; }
@@ -65,7 +66,6 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                     )
                 }));
         }
-
 
         private void SetupClient(HttpClientInterceptorOptions options)
         {
@@ -195,7 +195,119 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
 
             Assert.True(result.Count() == 3);
             Assert.True(result.First().Responses.Count == 1);
-            Assert.True(responsesText == "okokok");
+            // 4 ok because of validation request
+            Assert.True(responsesText == "okokokok");
+        }
+
+        [Fact]
+        public async Task Will_return_empty_when_xml_login_data_is_wrong()
+        {
+            var options = new HttpClientInterceptorOptions().ThrowsOnMissingRegistration();
+            new HttpRequestInterceptionBuilder()
+                .Requests()
+                .ForAnyHost()
+                .ForHttps()
+                .ForPost()
+                .Responds()
+                .WithStatus(HttpStatusCode.OK)
+                .WithContent("ok")
+                .RegisterWith(options);
+
+            SetupClient(options);
+
+            var responsesText = "";
+            Mocker.GetMock<ICarrierApiServiceResponseDeserializer<DhlMainResponseDto>>()
+                .Setup(s => s.Deserialize(It.IsAny<HttpResponseMessage>()))
+                .Callback<HttpResponseMessage>(r => responsesText += r.Content.ReadAsStringAsync().Result)
+                .Returns(Task.FromResult(new DhlMainResponseDto()
+                {
+                    MainFaultCode = "118",
+                    MainFaultText = "Invalid GKP username and/or password.",
+                    Responses = ImmutableList<DhlResponseDto>.Empty
+                }));
+
+            var service = Mocker.CreateInstance<DhlOnlineValidationService>();
+
+            var result = await service.GetResponsesFromApiAsync(new List<DataPack>()
+            {
+                new DataPack()
+                {
+                    Address = new Address(), Carrier = Carrier.DHL, DataPackChecked = InfoPackCheckStatus.Unchecked,
+                    Id = "123"
+                },new DataPack()
+                {
+                    Address = new Address(), Carrier = Carrier.DHL, DataPackChecked = InfoPackCheckStatus.Unchecked,
+                    Id = "456"
+                },
+                new DataPack()
+                {
+                    Address = new Address(), Carrier = Carrier.DHL, DataPackChecked = InfoPackCheckStatus.Unchecked,
+                    Id = "789"
+                }
+            }, CancellationToken.None);
+
+            Assert.Empty(result);
+            Assert.True(responsesText == "ok");
+        }
+
+        [Fact]
+        public async Task Will_return_empty_when_login_data_is_wrong()
+        {
+            var options = new HttpClientInterceptorOptions().ThrowsOnMissingRegistration();
+            new HttpRequestInterceptionBuilder()
+                .Requests()
+                .ForAnyHost()
+                .ForHttps()
+                .ForPost()
+                .Responds()
+                .WithStatus(HttpStatusCode.Unauthorized)
+                .WithContent("ok")
+                .RegisterWith(options);
+
+            SetupClient(options);
+
+            var responsesText = "";
+            Mocker.GetMock<ICarrierApiServiceResponseDeserializer<DhlMainResponseDto>>()
+                .Setup(s => s.Deserialize(It.IsAny<HttpResponseMessage>()))
+                .Callback<HttpResponseMessage>(r => responsesText += r.Content.ReadAsStringAsync().Result)
+                .Returns(Task.FromResult(new DhlMainResponseDto()
+                {
+                    MainFaultCode = "0",
+                    MainFaultText = "Correct response",
+                    Responses = ImmutableList.Create<DhlResponseDto>
+                    (
+                        new DhlResponseDto()
+                        {
+                            ErrorCode = 0,
+                            ErrorText = "No error",
+                            Key = "123",
+                            StatusMessages = ImmutableHashSet.Create("All is well")
+                        }
+                    )
+                }));
+
+            var service = Mocker.CreateInstance<DhlOnlineValidationService>();
+
+            var result = await service.GetResponsesFromApiAsync(new List<DataPack>()
+            {
+                new DataPack()
+                {
+                    Address = new Address(), Carrier = Carrier.DHL, DataPackChecked = InfoPackCheckStatus.Unchecked,
+                    Id = "123"
+                },new DataPack()
+                {
+                    Address = new Address(), Carrier = Carrier.DHL, DataPackChecked = InfoPackCheckStatus.Unchecked,
+                    Id = "456"
+                },
+                new DataPack()
+                {
+                    Address = new Address(), Carrier = Carrier.DHL, DataPackChecked = InfoPackCheckStatus.Unchecked,
+                    Id = "789"
+                }
+            }, CancellationToken.None);
+
+            Assert.Empty(result);
+            Assert.True(responsesText?.Length == 0);
         }
     }
 }

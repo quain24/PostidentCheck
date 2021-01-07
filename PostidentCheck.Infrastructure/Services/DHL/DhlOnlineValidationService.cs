@@ -1,5 +1,7 @@
 ﻿using KeePass.Models;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Postident.Application.Common.Extensions;
 using Postident.Application.Common.Interfaces;
 using Postident.Application.Common.Models;
 using Postident.Application.DHL;
@@ -43,16 +45,19 @@ namespace Postident.Infrastructure.Services.DHL
 
         protected override HttpClient Client { get; }
         protected override int QueriesPerSecond { get; }
+        private Secret XmlSecret { get; set; }
 
         protected override async Task<bool> AuthorizeClient(CancellationToken token)
         {
             try
             {
                 var secret = await _configuration.Secret(token).ConfigureAwait(false);
+                XmlSecret = await _configuration.XmlSecret(token).ConfigureAwait(false);
 
                 var byteArray = Encoding.ASCII.GetBytes(string.Join(':', secret.Username, secret.Password));
                 Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-                return true;
+
+                return await ValidateLoginDataOnline(token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -61,27 +66,59 @@ namespace Postident.Infrastructure.Services.DHL
             }
         }
 
+        /// <summary>
+        /// This method will validate logins and passwords online.<br/>
+        /// Http basic auth is validated against response to a 'dummy' request - <see cref="HttpStatusCode.Unauthorized"/> will be treated as authorization failure.<br/>
+        /// Xml login and password are validated by deserialization of response for 'dummy' request - return code '118' will be threaded as failure - as stated in API docs.<br/>
+        /// This methods purpose is to block any requests if authorization failed, so the API wont lock main account by mistake.
+        /// </summary>
+        /// <param name="ct"></param>
+        private async Task<bool> ValidateLoginDataOnline(CancellationToken ct)
+        {
+            _logger?.LogInformation("{0}: Checking xml login and password validity online...", ServiceName);
+            var testContent = _xmlRequestBuilderFactory
+                .CreateInstance()
+                .SetUpAuthorization(XmlSecret.Username, XmlSecret.Password)
+                .AddNewShipment("test", new Address { City = "test", CountryCode = "de", Name = "test", Street = "test" })
+                .BuildShipment()
+                .Build();
+            var context = new Context().WithLogger(_logger);
+            var request = new HttpRequestMessage(HttpMethod.Post, string.Empty) { Content = new StringContent(testContent) };
+            request.SetPolicyExecutionContext(context);
+
+            var response = await Client.SendAsync(request, ct).ConfigureAwait(false);
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                _logger?.LogError("{0}: Online service informs that supplied login or password is invalid!", ServiceName);
+                return false;
+            }
+
+            var dto = (await SerializeResponsesToDtos(new[] { response }, ct)).First();
+            if (dto?.MainFaultCode?.Equals("118", StringComparison.InvariantCultureIgnoreCase) ?? true)
+            {
+                _logger?.LogError("{0}: Online service informs that supplied XML login or password is invalid!" +
+                                  " Check data before retrying - DHL will lock account if there are to many invalid tries", ServiceName);
+                return false;
+            }
+
+            return true;
+        }
+
         protected override async Task<IEnumerable<HttpRequestMessage>> GenerateRequestsFrom(IEnumerable<DataPack> dataPacks, CancellationToken ct)
         {
-            var xmlSecret = await RetrieveXmlAuthorizationData(ct).ConfigureAwait(false);
-
             var output = dataPacks
                 .Batch(_configuration.MaxValidationsInQuery)
-                .Select(batch => CreateCombinedRequestFrom(batch, xmlSecret))
+                .Select(batch => CreateCombinedRequestFrom(batch))
                 .ToList();
 
             _logger.LogInformation("{0}: Generating {1} requests from {2} data packs.", ServiceName, output.Count, dataPacks.Count());
-
             return await Task.FromResult(output).ConfigureAwait(false);
         }
 
-        private HttpRequestMessage CreateCombinedRequestFrom(IEnumerable<DataPack> dataPacks, Secret secret)
+        private HttpRequestMessage CreateCombinedRequestFrom(IEnumerable<DataPack> dataPacks)
         {
-            var builder = _xmlRequestBuilderFactory.CreateInstance().SetUpAuthorization(secret.Username, secret.Password);
-            dataPacks.ToList().ForEach(d =>
-            {
-                builder.AddNewShipment(d.Id, d.Address).BuildShipment();
-            });
+            var builder = _xmlRequestBuilderFactory.CreateInstance().SetUpAuthorization(XmlSecret.Username, XmlSecret.Password);
+            dataPacks.ToList().ForEach(d => builder.AddNewShipment(d.Id, d.Address).BuildShipment());
 
             return new HttpRequestMessage(HttpMethod.Post, string.Empty)
             {
