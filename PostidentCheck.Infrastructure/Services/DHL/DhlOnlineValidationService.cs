@@ -72,7 +72,6 @@ namespace Postident.Infrastructure.Services.DHL
         /// Xml login and password are validated by deserialization of response for 'dummy' request - return code '118' will be threaded as failure - as stated in API docs.<br/>
         /// This methods purpose is to block any requests if authorization failed, so the API wont lock main account by mistake.
         /// </summary>
-        /// <param name="ct"></param>
         private async Task<bool> ValidateLoginDataOnline(CancellationToken ct)
         {
             _logger?.LogInformation("{0}: Checking xml login and password validity online...", ServiceName);
@@ -93,11 +92,12 @@ namespace Postident.Infrastructure.Services.DHL
                 return false;
             }
 
-            var dto = (await SerializeResponsesToDtos(new[] { response }, ct)).First();
-            if (dto?.MainFaultCode?.Equals("118", StringComparison.InvariantCultureIgnoreCase) ?? true)
+            var dto = (await SerializeResponsesToDtos(new[] { response }, ct)).FirstOrDefault();
+
+            if (!int.TryParse(dto?.MainFaultCode, out var errorCode) || (errorCode >= 110 && errorCode <= 119))
             {
-                _logger?.LogError("{0}: Online service informs that supplied XML login or password is invalid!" +
-                                  " Check data before retrying - DHL will lock account if there are to many invalid tries", ServiceName);
+                _logger?.LogError("{0}: Online service informs that supplied XML login or password is invalid! Error code: {1} | Error message: {2}" +
+                                  " | Check data before retrying - DHL will lock account if there are to many invalid tries", ServiceName, errorCode, dto?.MainFaultText);
                 return false;
             }
 
@@ -131,7 +131,5 @@ namespace Postident.Infrastructure.Services.DHL
             // Internal service errors from DHL also can be deserialized
             return Task.FromResult(responses.Where(r => r.IsSuccessStatusCode || r.StatusCode == HttpStatusCode.InternalServerError));
         }
-
-        private Task<Secret> RetrieveXmlAuthorizationData(CancellationToken ct) => _configuration.XmlSecret(ct);
     }
 }
