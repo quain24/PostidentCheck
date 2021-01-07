@@ -42,16 +42,16 @@ namespace Postident.Infrastructure.Mappers
 
             return new DataPack()
             {
-                Id = dataPackReadModel.Id.Trim(),
+                Id = dataPackReadModel?.Id.Trim() ?? string.Empty,
                 Carrier = dataPackReadModel.Carrier,
                 Address = new Address()
                 {
-                    City = dataPackReadModel.City.Trim(),
-                    CountryCode = dataPackReadModel.CountryCode.Trim(),
-                    PostIdent = dataPackReadModel.PostIdent.Trim(),
+                    City = dataPackReadModel.City?.Trim() ?? string.Empty,
+                    CountryCode = dataPackReadModel.CountryCode?.Trim() ?? string.Empty,
+                    PostIdent = dataPackReadModel.PostIdent?.Trim() ?? string.Empty,
                     Street = street,
                     StreetNumber = number,
-                    ZipCode = dataPackReadModel.ZipCode.Trim()
+                    ZipCode = dataPackReadModel.ZipCode?.Trim() ?? string.Empty
                 },
                 DataPackChecked = dataPackReadModel.DataPackChecked
             };

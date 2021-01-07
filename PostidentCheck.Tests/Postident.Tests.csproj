@@ -42,7 +42,6 @@
   <ItemGroup>
     <Folder Include="Integration tests\Infrastructure\Common\" />
     <Folder Include="Integration tests\Infrastructure\DHL\" />
-    <Folder Include="Unit tests\Application\Services\DHL\Fixtures\" />
     <Folder Include="Unit tests\Infrastructure\Common\" />
     <Folder Include="Unit tests\Infrastructure\Fixtures\" />
   </ItemGroup>

@@ -24,23 +24,28 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
 {
     public class DhlOnlineValidationServiceTests
     {
-        private ITestOutputHelper Output { get; }
-        private AutoMocker Mocker;
-
         public DhlOnlineValidationServiceTests(ITestOutputHelper output)
         {
             Output = output;
             MockerSetup();
         }
+        private ITestOutputHelper Output { get; }
+        private AutoMocker Mocker { get; set; }
+        private HttpResponseMessage Response { get; set; }
 
         private void MockerSetup()
         {
-            var settings = DhlSettingsFixture.GetProperSettings(10, 1);
             Mocker = new AutoMocker();
-            Mocker.Use<IDhlSettings>(settings);
+            var builder = Mocker.GetMock<IValidationRequestXmlBuilder>().Object;
+
+            Mocker.Use<IDhlSettings>(DhlSettingsFixture.GetProperSettings(10, 1));
             Mocker.Use<IDefaultShipmentValues>(TestShipmentDefaultValuesFixture.Defaults());
             Mocker.Use<ILogger<DhlOnlineValidationService>>(Output.BuildLoggerFor<DhlOnlineValidationService>());
-            Mocker.Use<IValidationRequestXmlBuilderFactory>(new ValidationRequestXmlBuilderFactory(TestShipmentDefaultValuesFixture.Defaults()));
+            Mocker.GetMock<ISingleShipmentBuilder>().Setup(b => b.BuildShipment()).Returns(builder);
+            Mocker.GetMock<IValidationRequestXmlBuilderFactory>().Setup(b => b.CreateInstance()).Returns(builder);
+            Mocker.GetMock<IValidationRequestXmlBuilder>().Setup(b => b.Build()).Returns("xml validation request string");
+            Mocker.GetMock<IValidationRequestXmlBuilder>().Setup(b => b.SetUpAuthorization(It.IsAny<string>(), It.IsAny<string>())).Returns(builder);
+            Mocker.GetMock<IValidationRequestXmlBuilder>().Setup(b => b.AddNewShipment(It.IsAny<string>(), It.IsAny<Address>())).Returns(Mocker.GetMock<ISingleShipmentBuilder>().Object);
             Mocker.GetMock<ICarrierApiServiceResponseDeserializer<DhlMainResponseDto>>()
                 .Setup(s => s.Deserialize(It.IsAny<HttpResponseMessage>()))
                 .Callback<HttpResponseMessage>(r => Response = r)
@@ -61,7 +66,6 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 }));
         }
 
-        private HttpResponseMessage Response;
 
         private void SetupClient(HttpClientInterceptorOptions options)
         {
@@ -75,7 +79,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         public async Task Will_handle_proper_response()
         {
             var options = new HttpClientInterceptorOptions().ThrowsOnMissingRegistration();
-            var builder = new HttpRequestInterceptionBuilder()
+            new HttpRequestInterceptionBuilder()
                 .Requests()
                 .ForAnyHost()
                 .ForHttps()
@@ -106,7 +110,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         public async Task Will_handle_deserializable_error_response()
         {
             var options = new HttpClientInterceptorOptions().ThrowsOnMissingRegistration();
-            var builder = new HttpRequestInterceptionBuilder()
+            new HttpRequestInterceptionBuilder()
                 .Requests()
                 .ForAnyHost()
                 .ForHttps()
@@ -137,7 +141,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         public async Task Will_handle_multiple_data_packs()
         {
             var options = new HttpClientInterceptorOptions().ThrowsOnMissingRegistration();
-            var builder = new HttpRequestInterceptionBuilder()
+            new HttpRequestInterceptionBuilder()
                 .Requests()
                 .ForAnyHost()
                 .ForHttps()

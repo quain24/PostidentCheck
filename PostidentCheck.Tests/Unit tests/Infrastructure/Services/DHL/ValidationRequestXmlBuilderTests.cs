@@ -1,5 +1,4 @@
-﻿using KeePass.Models;
-using Postident.Application.Common.Models;
+﻿using Postident.Application.Common.Models;
 using Postident.Infrastructure.Services.DHL;
 using Postident.Tests.Unit_tests.Infrastructure.Services.DHL.Fixtures;
 using System;
@@ -22,11 +21,8 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         {
             var builder = new ValidationRequestXmlBuilder(TestShipmentDefaultValuesFixture.Defaults());
 
-            var result = builder.SetUpAuthorization(new Secret() { Password = "pass", Username = "usr", Id = "1" })
-                .AddNewShipment()
-                .SetUpId("123")
-                .SetUpShippingDate(new DateTime(3000, 1, 1))
-                .SetUpReceiverData(new Address
+            var result = builder.SetUpAuthorization("usr", "pass")
+                .AddNewShipment("123", new Address
                 {
                     City = "a",
                     CountryCode = "de",
@@ -36,6 +32,8 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                     StreetNumber = "1",
                     ZipCode = "12345"
                 })
+                .SetUpId("123")
+                .SetUpShippingDate(new DateTime(3000, 1, 1))
                 .BuildShipment()
                 .Build();
 
@@ -48,11 +46,8 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         {
             var builder = new ValidationRequestXmlBuilder(TestShipmentDefaultValuesFixture.Defaults());
 
-            var result = builder.SetUpAuthorization(new Secret() { Password = "pass", Username = "usr", Id = "1" })
-                .AddNewShipment()
-                .SetUpId("123")
-                .SetUpShippingDate(new DateTime(3000, 1, 1))
-                .SetUpReceiverData(new Address
+            var result = builder.SetUpAuthorization("usr", "pass")
+                .AddNewShipment("123", new Address
                 {
                     City = "a",
                     CountryCode = "AT",
@@ -62,6 +57,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                     StreetNumber = "1",
                     ZipCode = "12345"
                 })
+                .SetUpShippingDate(new DateTime(3000, 1, 1))
                 .BuildShipment()
                 .Build();
 
@@ -70,15 +66,12 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         }
 
         [Fact]
-        public void Builds_xml_from_proper_data_international_outside_eus()
+        public void Builds_xml_from_proper_data_international_outside_eu()
         {
             var builder = new ValidationRequestXmlBuilder(TestShipmentDefaultValuesFixture.Defaults());
 
-            var result = builder.SetUpAuthorization(new Secret() { Password = "pass", Username = "usr", Id = "1" })
-                .AddNewShipment()
-                .SetUpId("123")
-                .SetUpShippingDate(new DateTime(3000, 1, 1))
-                .SetUpReceiverData(new Address
+            var result = builder.SetUpAuthorization("usr", "pass")
+                .AddNewShipment("123", new Address
                 {
                     City = "a",
                     CountryCode = "CN",
@@ -88,6 +81,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                     StreetNumber = "1",
                     ZipCode = "12345"
                 })
+                .SetUpShippingDate(new DateTime(3000, 1, 1))
                 .BuildShipment()
                 .Build();
 
@@ -100,7 +94,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         {
             var builder = new ValidationRequestXmlBuilder(TestShipmentDefaultValuesFixture.Defaults());
 
-            Assert.Throws<MissingFieldException>(() => builder.SetUpAuthorization(new Secret { Password = "pass", Username = "usr", Id = "1" }).Build());
+            Assert.Throws<MissingFieldException>(() => builder.SetUpAuthorization("usr", "pass").Build());
         }
 
         [Fact]
@@ -109,10 +103,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
             var builder = new ValidationRequestXmlBuilder(TestShipmentDefaultValuesFixture.Defaults());
 
             Assert.Throws<MissingFieldException>(() => builder
-                .AddNewShipment()
-                .SetUpId("123")
-                .SetUpShippingDate(new DateTime(3000, 1, 1))
-                .SetUpReceiverData(new Address
+                .AddNewShipment("123", new Address
                 {
                     City = "a",
                     CountryCode = "dd",
@@ -122,6 +113,7 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                     StreetNumber = "1",
                     ZipCode = "12345"
                 })
+                .SetUpShippingDate(new DateTime(3000, 1, 1))
                 .BuildShipment()
                 .Build());
         }

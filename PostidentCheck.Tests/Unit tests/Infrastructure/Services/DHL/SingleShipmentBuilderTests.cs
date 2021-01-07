@@ -26,21 +26,20 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
             var mocker = new AutoMocker();
             var builder = mocker.GetMock<ValidationRequestXmlBuilder>();
             var actual = new List<XElement>();
-            var test = new SingleShipmentBuilder(TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, actual);
+            var test = new SingleShipmentBuilder("123", new Address
+            {
+                City = "a",
+                CountryCode = "de",
+                Name = "a",
+                PostIdent = "123456",
+                Street = "a",
+                StreetNumber = "1",
+                ZipCode = "12345"
+            }, TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, actual);
 
             test
                 .SetUpId("123")
                 .SetUpShippingDate(new DateTime(3000, 1, 1))
-                .SetUpReceiverData(new Address
-                {
-                    City = "a",
-                    CountryCode = "de",
-                    Name = "a",
-                    PostIdent = "123456",
-                    Street = "a",
-                    StreetNumber = "1",
-                    ZipCode = "12345"
-                })
                 .BuildShipment();
 
             Output.WriteLine(actual.First().ToString());
@@ -49,26 +48,52 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         }
 
         [Fact]
+        public void Creates_single_international_shipment_element_when_correctly_built()
+        {
+            var mocker = new AutoMocker();
+            var builder = mocker.GetMock<ValidationRequestXmlBuilder>();
+            var actual = new List<XElement>();
+            var test = new SingleShipmentBuilder("123", new Address
+            {
+                City = "a",
+                CountryCode = "at",
+                Name = "a",
+                PostIdent = "123456",
+                Street = "a",
+                StreetNumber = "1",
+                ZipCode = "12345"
+            }, TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, actual);
+
+            test
+                .SetUpId("123")
+                .SetUpShippingDate(new DateTime(3000, 1, 1))
+                .BuildShipment();
+
+            Output.WriteLine(actual.First().ToString());
+            Assert.True(actual.Count == 1);
+            Assert.Equal(RawXmlDataFixtures.TestSingleInternationalShipment(), actual.First().ToString());
+        }
+
+        [Fact]
         public void Creates_multiple_shipment_elements_when_correctly_built()
         {
             var mocker = new AutoMocker();
             var builder = mocker.GetMock<ValidationRequestXmlBuilder>();
             var actual = new List<XElement>();
-            var test = new SingleShipmentBuilder(TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, actual);
+            var test = new SingleShipmentBuilder("123", new Address
+            {
+                City = "a",
+                CountryCode = "de",
+                Name = "a",
+                PostIdent = "123456",
+                Street = "a",
+                StreetNumber = "1",
+                ZipCode = "12345"
+            }, TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, actual);
 
             test
                 .SetUpId("123")
                 .SetUpShippingDate(new DateTime(3000, 1, 1))
-                .SetUpReceiverData(new Address
-                {
-                    City = "a",
-                    CountryCode = "de",
-                    Name = "a",
-                    PostIdent = "123456",
-                    Street = "a",
-                    StreetNumber = "1",
-                    ZipCode = "12345"
-                })
                 .BuildShipment();
 
             test
@@ -95,45 +120,36 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
         }
 
         [Fact]
-        public void Throws_Missing_field_exc_if_address_not_provided()
+        public void Throws_arg_null_exc_if_address_is_null()
         {
             var mocker = new AutoMocker();
             var builder = mocker.GetMock<ValidationRequestXmlBuilder>();
             var actual = new List<XElement>();
-            var test = new SingleShipmentBuilder(TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, actual);
 
-            Assert.Throws<MissingFieldException>(() =>
+            Assert.Throws<ArgumentNullException>(() =>
             {
-                test
-                    .SetUpId("123")
-                    .SetUpShippingDate(new DateTime(3000, 1, 1))
-                    .BuildShipment();
+                new SingleShipmentBuilder("123", null, TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, actual);
             });
         }
 
         [Fact]
-        public void Throws_Missing_field_exc_if_id_not_provided()
+        public void Throws_arg_null_exc_if_id_not_provided()
         {
             var mocker = new AutoMocker();
             var builder = mocker.GetMock<ValidationRequestXmlBuilder>();
-            var actual = new List<XElement>();
-            var test = new SingleShipmentBuilder(TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, actual);
 
-            Assert.Throws<MissingFieldException>(() =>
+            Assert.Throws<ArgumentNullException>(() =>
             {
-                test
-                    .SetUpShippingDate(new DateTime(3000, 1, 1))
-                    .SetUpReceiverData(new Address
-                    {
-                        City = "a",
-                        CountryCode = "dd",
-                        Name = "a",
-                        PostIdent = "123456",
-                        Street = "a",
-                        StreetNumber = "1",
-                        ZipCode = "12345"
-                    })
-                    .BuildShipment();
+                new SingleShipmentBuilder(string.Empty, new Address
+                {
+                    City = "a",
+                    CountryCode = "dd",
+                    Name = "a",
+                    PostIdent = "123456",
+                    Street = "a",
+                    StreetNumber = "1",
+                    ZipCode = "12345"
+                }, TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, new List<XElement>());
             });
         }
     }
