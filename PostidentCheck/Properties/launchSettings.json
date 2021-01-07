@@ -1,7 +1,8 @@
 {
   "profiles": {
     "PostidentCheck": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "--id 1000757946"
     }
   }
 }

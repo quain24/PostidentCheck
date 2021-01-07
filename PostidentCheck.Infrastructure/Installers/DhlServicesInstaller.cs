@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using KeePass;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Postident.Application.Common.Interfaces;
@@ -24,17 +25,10 @@ namespace Postident.Infrastructure.Installers
         internal static IServiceCollection SetupDHLServices(this IServiceCollection services, IConfiguration configuration)
         {
             var serviceName = "DHL PostIdent";
-
             var dhlSettingsFromFile = new DhlSettingsFromAppsettings();
             configuration.Bind("DHL", dhlSettingsFromFile);
-#if DEBUG
-            var logins = new DhlOfflineSettings.AppSet();
-            configuration.Bind("KeePassOfflineStore", logins);
-            services.AddSingleton<IDhlSettings, DhlOfflineSettings>(provider =>
-            new DhlOfflineSettings(dhlSettingsFromFile, logins.Login, logins.Password, logins.XmlLogin, logins.XmlPassword));
-#else
-            services.AddSingleton<IDhlSettings, DhlSettingsFromPasswordServer>(provider => new DhlSettingsFromPasswordServer(provider.GetRequiredService<IKeePassService>(), dhlSettingsFromFile));
-#endif
+
+            services.SetupSetting(configuration, dhlSettingsFromFile);
 
             services.AddHttpClient(serviceName, client =>
                 {
@@ -54,6 +48,30 @@ namespace Postident.Infrastructure.Installers
             services.AddTransient<IDhlApiService, DhlOnlineValidationService>();
             services.AddTransient<ICarrierApiServiceResponseDeserializer<DhlMainResponseDto>, DhlResponseDeserializer>
             (srv => new DhlResponseDeserializer(serviceName, srv.GetRequiredService<ILogger<DhlResponseDeserializer>>()));
+
+            return services;
+        }
+
+        /// <summary>
+        /// This method will choose appropriate source of logins and passwords. If this data is set in json file, then<br/>
+        /// KeePass service will not be called - useful when debugging on local machine.<br/>
+        /// Otherwise normal KeePass service will be used.
+        /// </summary>
+        private static IServiceCollection SetupSetting(this IServiceCollection services, IConfiguration configuration, DhlSettingsFromAppsettings settingsFromFile)
+        {
+            var logins = new DhlOfflineSettings.AppSet();
+            configuration.Bind("KeePassOfflineStore", logins);
+
+            if (string.IsNullOrWhiteSpace(logins.Login) || string.IsNullOrWhiteSpace(logins.XmlLogin))
+            {
+                services.AddSingleton<IDhlSettings, DhlSettingsFromPasswordServer>(provider =>
+                new DhlSettingsFromPasswordServer(provider.GetRequiredService<IKeePassService>(), settingsFromFile));
+            }
+            else
+            {
+                services.AddSingleton<IDhlSettings, DhlOfflineSettings>(_ =>
+                new DhlOfflineSettings(settingsFromFile, logins.Login, logins.Password, logins.XmlLogin, logins.XmlPassword));
+            }
 
             return services;
         }
