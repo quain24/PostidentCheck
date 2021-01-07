@@ -60,10 +60,10 @@ namespace Postident.Infrastructure.Services
                     validEntries.Add(d);
                     return;
                 }
-                _logger?.LogWarning("{0}: ID {1} - {2}", Name, string.IsNullOrWhiteSpace(d.Id) ? "Unknown" : d.Id, result.CombinedErrors());
+                _logger?.LogError("{0}: ID {1} - {2}", Name, string.IsNullOrWhiteSpace(d.Id) ? "Unknown" : d.Id, result.CombinedErrors());
                 if (result.Errors.Any(v => v.ErrorCode == "id_missing"))
                 {
-                    _logger?.LogWarning("{0}: Missing id - data pack will NOT be processed further even as invalid - purging!");
+                    _logger?.LogError("{0}: Missing id - data pack will NOT be processed further even as invalid - purging!");
                     return;
                 }
 

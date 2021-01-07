@@ -41,6 +41,10 @@ namespace Postident.Infrastructure.Installers
             return services;
         }
 
+        /// <summary>
+        /// Loads default values for <see cref="Interfaces.DHL.IValidationRequestXmlBuilder"/> and <see cref="Interfaces.DHL.ISingleShipmentBuilder"/><br />
+        /// from json file
+        /// </summary>
         private static IServiceCollection AddDefaultShipmentValues(this IServiceCollection services, IConfiguration configuration)
         {
             var defaults = new DefaultShipmentValuesFromFile();

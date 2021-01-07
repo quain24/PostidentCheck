@@ -74,7 +74,7 @@ namespace Postident.Application.DHL.Commands
         private CommandResult<int> NoDataPacksToCheck()
         {
             _logger?.LogInformation("{0}: Database query returned no data to be check", Name);
-            return CommandResult<int>.ValidResult(0, "Database query returned no data to be check");
+            return CommandResult<int>.ValidResult(0, "Database query returned no data to be checked");
         }
 
         private async Task<CommandResult<int>> UpdateDatabase(ICollection<InfoPackWriteModel> data)

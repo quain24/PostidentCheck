@@ -8,10 +8,11 @@ namespace Postident.Infrastructure.Installers
 {
     internal static class DatabaseInstaller
     {
-        internal static IServiceCollection SetupParcelDatabase(this IServiceCollection services, string connectionString)
+        internal static IServiceCollection SetupDatabaseAccess(this IServiceCollection services, string connectionString)
         {
             services.AddDbContext<IDataPackDbContext, DataPackDbContext>(options =>
-                // ServiceLifetime transient solves most of concurrency issues for DbContext
+            {
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 options.UseSqlServer(
                     connectionString,
                     sqlServerOptionsAction: sqlOptions =>
@@ -20,8 +21,10 @@ namespace Postident.Infrastructure.Installers
                             maxRetryCount: 5,
                             maxRetryDelay: TimeSpan.FromSeconds(30),
                             errorNumbersToAdd: null);
-                    }));//,
-                        //ServiceLifetime.Transient);
+                    });
+                // ServiceLifetime transient solves most of concurrency issues for DbContext
+                //ServiceLifetime.Transient);
+            });
 
             services.AddDbContext<IInfoPackDbContext, InfoPackDbContext>(options =>
                 options.UseSqlServer(

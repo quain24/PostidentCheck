@@ -21,7 +21,7 @@ namespace Postident.Infrastructure.Services
     /// Tries to skip possibly incorrect data and continue to work with proper ones.
     /// </summary>
     /// <typeparam name="TResponseDTO">Type of DTO that implementing class wish to work with</typeparam>
-    /// <typeparam name="TQueriedDataType">Type of data object that this object will query API service about</typeparam>
+    /// <typeparam name="TQueriedDataType">Type of data object that this service will use when queering API service</typeparam>
     public abstract class ApiServiceBase<TResponseDTO, TQueriedDataType> where TResponseDTO : class where TQueriedDataType : class
     {
         private readonly string _serviceName;
@@ -29,11 +29,10 @@ namespace Postident.Infrastructure.Services
         private readonly ILogger _logger;
 
         /// <summary>
-        /// <inheritdoc cref="ApiServiceBase{TResponseDTO}"/>
+        /// <inheritdoc cref="ApiServiceBase{TResponseDTO,TQueriedDataType}"/>
         /// </summary>
         /// <param name="serviceName">Name of a carrier to which this API connects - used in logging</param>
         /// <param name="deserializer">Object used to deserialize API responses (<see cref="HttpResponseMessage"/>) into chosen <typeparamref name="TResponseDTO"/> type</param>
-        /// <param name="dataPackValidator">Validates <see cref="DataPackReadModel"/> objects, which data will be used to create API queries</param>
         /// <param name="logger">Used to log any errors, optional</param>
         protected ApiServiceBase(string serviceName, ICarrierApiServiceResponseDeserializer<TResponseDTO> deserializer, ILogger logger)
         {
@@ -87,6 +86,12 @@ namespace Postident.Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// When overwritten, provides a method for authentication setup for current <see cref="HttpClient"/>
+        /// Typically used for setting up token authentication / basic auth. It is executed on each <see cref="GetResponsesFromApiAsync"/> call
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns>Enables service to progress further if true. If not, service will stop</returns>
         protected virtual Task<bool> AuthorizeClient(CancellationToken token) => Task.FromResult(true);
 
         /// <summary>
@@ -104,7 +109,7 @@ namespace Postident.Infrastructure.Services
             var responses = new ConcurrentBag<HttpResponseMessage>();
             var limiter = new SemaphoreSlim(QueriesPerSecond);
             var context = new Polly.Context().WithLogger(_logger);
-            int receivedResponseCounter = 0;
+            var receivedResponseCounter = 0;
 
             _logger?.LogInformation("{0}: Starting api call - {1} requests to check.", _serviceName, requests.Count());
 

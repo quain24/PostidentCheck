@@ -12,7 +12,7 @@ namespace Postident.Application.Common.Validators
                 .NotEmpty()
                 .WithSeverity(Severity.Error)
                 .WithErrorCode("id_missing")
-                .WithMessage(d => "ID missing!");
+                .WithMessage("ID missing!");
 
             RuleFor(d => d.DataPackChecked)
                 .IsInEnum()
