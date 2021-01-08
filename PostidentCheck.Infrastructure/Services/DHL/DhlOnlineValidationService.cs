@@ -74,21 +74,21 @@ namespace Postident.Infrastructure.Services.DHL
         /// </summary>
         private async Task<bool> ValidateLoginDataOnline(CancellationToken ct)
         {
-            _logger?.LogInformation("{0}: Checking xml login and password validity online...", ServiceName);
+            _logger?.LogInformation("{0}: Validating xml login and password online...", ServiceName);
             var testContent = _xmlRequestBuilderFactory
                 .CreateInstance()
                 .SetUpAuthorization(XmlSecret.Username, XmlSecret.Password)
                 .AddNewShipment("test", new Address { City = "test", CountryCode = "de", Name = "test", Street = "test" })
                 .BuildShipment()
                 .Build();
-            var context = new Context().WithLogger(_logger);
             var request = new HttpRequestMessage(HttpMethod.Post, string.Empty) { Content = new StringContent(testContent) };
+            var context = new Context().WithLogger(_logger);
             request.SetPolicyExecutionContext(context);
 
             var response = await Client.SendAsync(request, ct).ConfigureAwait(false);
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                _logger?.LogError("{0}: Online service informs that supplied login or password is invalid!", ServiceName);
+                _logger?.LogError("{0}: Online service informs that supplied http client login or password is invalid!", ServiceName);
                 return false;
             }
 
