@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using CommandLine;
+﻿using CommandLine;
 using Postident.Core.Enums;
+using System;
+using System.Collections.Generic;
 
 namespace PostidentCheck
 {

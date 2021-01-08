@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Postident.Core.Entities;
 using Postident.Core.Enums;
+using System;
+using System.Collections.Generic;
 
 namespace Postident.Application.Common.Extensions
 {
