@@ -51,6 +51,7 @@ namespace Postident.Infrastructure.Services.DHL
         {
             BaseAddress = settings.BaseAddress;
             MaxQueriesPerSecond = settings.MaxQueriesPerSecond;
+            MaxValidationsInQuery = settings.MaxValidationsInQuery;
             XmlSecretGuid = settings.XmlSecret;
             SecretGuid = settings.Secret;
         }
