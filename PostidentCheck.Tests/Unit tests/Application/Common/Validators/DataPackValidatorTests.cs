@@ -31,11 +31,66 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
                     PostIdent = "123456789",
                     ZipCode = "65888"
                 },
+                Email = "proper.email.ger@wp.de",
                 DataPackChecked = InfoPackCheckStatus.Unchecked,
                 Id = "12345"
             };
 
             Assert.True(val.Validate(test).IsValid);
+        }
+
+        [Fact]
+        public void Will_return_false_if_email_Is_empty()
+        {
+            var val = new DataPackValidator(new AddressValidator());
+            var test = new DataPack()
+            {
+                Carrier = Carrier.DHL,
+                Address = new Address()
+                {
+                    Street = "Norm strasse",
+                    City = "berlin",
+                    CountryCode = "DE",
+                    PostIdent = "123456789",
+                    ZipCode = "65888"
+                },
+                Email = "",
+                DataPackChecked = InfoPackCheckStatus.Unchecked,
+                Id = "12345"
+            };
+
+            Assert.False(val.Validate(test).IsValid);
+        }
+
+        [Theory]
+        [InlineData("  email@wp.pl")]
+        [InlineData("email..@wp.pl")]
+        [InlineData("email.@wp.pl")]
+        [InlineData("email.new.@wp.pl")]
+        [InlineData("email.new.123@ wp.pl")]
+        [InlineData("email.new.123@wp.berlinnn")]
+        [InlineData("email.new.123@pllll")]
+        [InlineData("email.new<.123@pllll.cop")]
+        public void Will_return_false_if_email_Is_invalid(string email)
+        {
+            var val = new DataPackValidator(new AddressValidator());
+            var test = new DataPack()
+            {
+                Carrier = Carrier.DHL,
+                Address = new Address()
+                {
+                    Street = "Norm strasse",
+                    City = "berlin",
+                    CountryCode = "DE",
+                    PostIdent = "123456789",
+                    ZipCode = "65888"
+                },
+                Email = email,
+                DataPackChecked = InfoPackCheckStatus.Unchecked,
+                Id = "12345"
+            };
+
+            Assert.False(val.Validate(test).IsValid);
         }
 
         [Fact]
@@ -61,6 +116,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
                     PostIdent = "123456789",
                     ZipCode = "65888"
                 },
+                Email = "test@test.com",
                 DataPackChecked = InfoPackCheckStatus.Unchecked,
                 Id = ""
             };
@@ -85,6 +141,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
                     PostIdent = "",
                     ZipCode = "65888"
                 },
+                Email = "test@test.com",
                 DataPackChecked = InfoPackCheckStatus.Unchecked,
                 Id = "12345"
             };
@@ -109,6 +166,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
                     PostIdent = "AA123456789",
                     ZipCode = "65888"
                 },
+                Email = "test@test.com",
                 DataPackChecked = InfoPackCheckStatus.Unchecked,
                 Id = "12345"
             };
@@ -133,6 +191,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
                     PostIdent = "AA123456789",
                     ZipCode = "65888"
                 },
+                Email = "test@test.com",
                 DataPackChecked = InfoPackCheckStatus.Unchecked,
                 Id = "12345"
             };
@@ -157,6 +216,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
                     PostIdent = "AA123456789",
                     ZipCode = "65888"
                 },
+                Email = "test@test.com",
                 DataPackChecked = (InfoPackCheckStatus)33,
                 Id = "12345"
             };
@@ -174,6 +234,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
             {
                 Carrier = Carrier.DHL,
                 DataPackChecked = InfoPackCheckStatus.Unchecked,
+                Email = "test@test.com",
                 Id = "12345"
             };
 

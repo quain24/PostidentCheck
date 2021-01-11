@@ -21,6 +21,7 @@ namespace Postident.Infrastructure.Persistence.Configurations
             builder.Property(e => e.ZipCode).HasColumnName("zip");
             builder.Property(e => e.CountryCode).HasColumnName("country");
             builder.Property(e => e.PostIdent).HasColumnName("postIdent");
+            builder.Property(e => e.Email).HasColumnName("mail");
             builder.Property(e => e.DataPackChecked).HasColumnName("checkStatus").HasConversion<int>();
         }
     }
