@@ -33,9 +33,9 @@ namespace Postident.Tests.Integration_tests.Infrastructure.Persistence
         }
 
         [Theory]
-        [InlineData("1000553417")]
-        [InlineData("1000553850")]
-        [InlineData("1000563031")]
+        [InlineData("1000757941")]
+        [InlineData("1000757942")]
+        [InlineData("1000757943")]
         public async Task Will_return_correct_DataPack_when_given_valid_id(string id)
         {
             Repository = new DataPackReadRepository(_fixture);
@@ -47,9 +47,9 @@ namespace Postident.Tests.Integration_tests.Infrastructure.Persistence
         }
 
         [Theory]
-        [InlineData("1000553417", "1000553850", "1000563031")]
-        [InlineData("1000553850", "1000571751", "1000573003")]
-        [InlineData("1000563031", "1000553417", "1000571751")]
+        [InlineData("1000758322", "1000758018", "1000758017")]
+        [InlineData("1000758016", "1000758014", "1000758013")]
+        [InlineData("1000758010", "1000758008", "1000758007")]
         public async Task Will_return_correct_DataPacks_when_given_valid_multiple_ids(string id, string id2, string id3)
         {
             Repository = new DataPackReadRepository(_fixture);

@@ -11,6 +11,7 @@ namespace Postident.Core.Entities
         public string ZipCode { get; init; }
         public string City { get; init; }
         public string CountryCode { get; init; }
+        public string Email { get; set; }
         public InfoPackCheckStatus DataPackChecked { get; init; }
     }
 }

@@ -8,6 +8,7 @@ namespace Postident.Application.Common.Models
         public Carrier Carrier { get; init; }
 
         public Address Address { get; init; }
+        public string Email { get; set; }
 
         public InfoPackCheckStatus DataPackChecked { get; init; }
     }

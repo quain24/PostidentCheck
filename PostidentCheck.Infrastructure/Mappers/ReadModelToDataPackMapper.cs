@@ -58,6 +58,7 @@ namespace Postident.Infrastructure.Mappers
                     StreetNumber = number,
                     ZipCode = dataPackReadModel.ZipCode?.Trim() ?? string.Empty
                 },
+                Email = dataPackReadModel.Email?.Trim() ?? string.Empty,
                 DataPackChecked = dataPackReadModel.DataPackChecked
             };
         }

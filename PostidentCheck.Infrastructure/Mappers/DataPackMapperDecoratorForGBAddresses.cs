@@ -47,6 +47,7 @@ namespace Postident.Infrastructure.Mappers
                     },
                     Carrier = mappedDataPack.Carrier,
                     DataPackChecked = mappedDataPack.DataPackChecked,
+                    Email = mappedDataPack.Email,
                     Id = mappedDataPack.Id
                 };
             }

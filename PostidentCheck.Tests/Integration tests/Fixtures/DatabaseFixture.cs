@@ -40,7 +40,8 @@ namespace Postident.Tests.Integration_tests.Fixtures
                 Carrier = Enum.Parse<Carrier>(p.carrier),
                 DataPackChecked = (InfoPackCheckStatus)p.checkStatus,
                 Id = p.orderId,
-                ZipCode = p.zip
+                ZipCode = p.zip,
+                Email = p.mail
             }).ToList();
 
             GetDataPacks = CloneDataPackDataSeed;
@@ -133,6 +134,7 @@ namespace Postident.Tests.Integration_tests.Fixtures
             public string zip { get; set; }
             public string city { get; set; }
             public string country { get; set; }
+            public string mail { get; set; }
 
             /// <summary>
             /// -1 - not checked, 0 - checked, contains errors, 1 - valid
