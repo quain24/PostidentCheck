@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Postident.Application.Common.Interfaces;
 using Postident.Core.Entities;
 using Postident.Infrastructure.Common;
@@ -58,7 +59,11 @@ namespace Postident.Infrastructure.Installers
         {
             services.AddTransient<IInvalidValidationToWriteModelMapper<InfoPackWriteModel>, InvalidValidationToWriteModelMapper>();
             services.AddTransient<IDhlResponseToWriteModelMapper, DhlResponseToWriteModelMapper>();
-            services.AddTransient<IReadModelToDataPackMapper, ReadModelToDataPackMapper>();
+            services.AddTransient<IReadModelToDataPackMapper, DataPackMapperDecoratorForGBAddresses>(srv =>
+            {
+                var logger = srv.GetRequiredService<ILogger<IReadModelToDataPackMapper>>();
+                return new DataPackMapperDecoratorForGBAddresses(new ReadModelToDataPackMapper(logger), logger);
+            });
 
             return services;
         }

@@ -3,6 +3,7 @@ using Postident.Core.Entities;
 using Postident.Core.Enums;
 using Postident.Infrastructure.Mappers;
 using System.Collections.Generic;
+using Postident.Infrastructure.Common;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -73,23 +74,34 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Mappers
                     {
                         Carrier = Carrier.DHL,
                         City = "Augsburg",
-                        CountryCode = "DE",
+                        CountryCode = "gb",
                         DataPackChecked = InfoPackCheckStatus.Unchecked,
                         Id = "5", PostIdent = "",
-                        Street = "Alexander-Pachmann-Str. 27",
+                        Street = "Finches Park Road 14",
                         ZipCode = "123456"
-                    }, "Alexander-Pachmann-Str.", "27","Augsburg","DE",Carrier.DHL,InfoPackCheckStatus.Unchecked,"5","","123456"},
+                    }, "Finches Park Road", "14","Augsburg","gb",Carrier.DHL,InfoPackCheckStatus.Unchecked,"5","","123456"},
                 new object[] {
                     new DataPackReadModel
                     {
                         Carrier = Carrier.DHL,
                         City = "Berlin",
-                        CountryCode = "DE",
+                        CountryCode = "GB",
                         DataPackChecked = InfoPackCheckStatus.Unchecked,
                         Id = "6", PostIdent = "857907118",
                         Street = "Packstation 146",
                         ZipCode = "123456"
-                    }, "Packstation", "146","Berlin","DE",Carrier.DHL,InfoPackCheckStatus.Unchecked,"6","857907118","123456"}
+                    }, "Packstation", "146","Berlin","GB",Carrier.DHL,InfoPackCheckStatus.Unchecked,"6","857907118","123456"},
+                new object[] {
+                    new DataPackReadModel
+                    {
+                        Carrier = Carrier.DHL,
+                        City = "London",
+                        CountryCode = "GB",
+                        DataPackChecked = InfoPackCheckStatus.Unchecked,
+                        Id = "6", PostIdent = "857907118",
+                        Street = "4 Saffron Hill Road",
+                        ZipCode = "AB ZU68"
+                    }, "Saffron Hill Road", "4","London","GB",Carrier.DHL,InfoPackCheckStatus.Unchecked,"6","857907118","AB ZU68"}
             };
 
         [Theory]
@@ -187,6 +199,50 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Mappers
             Assert.Equal(id, result.Id);
             Assert.Equal(zipCode, actual.ZipCode);
             Assert.Equal(postident, actual.PostIdent);
+        }
+
+        [Fact]
+        public void Will_replace_name_if_given_default_from_dictionary()
+        {
+            var test = new ReadModelToDataPackMapper(new DefaultNamingMap(new Dictionary<string, HashSet<string>>(){{ "default_name", new HashSet<string>(){"replace_1", "replace_2" }}}), Logger);
+            var data = new DataPackReadModel
+            {
+                Carrier = Carrier.DHL,
+                City = "Lippstadt",
+                CountryCode = "DE",
+                DataPackChecked = InfoPackCheckStatus.Unchecked,
+                Id = "4",
+                PostIdent = "1",
+                Street = "replace_2 123",
+                ZipCode = "123456"
+            };
+
+            var actual = test.Map(data);
+
+            Assert.Equal("default_name", actual.Address.Street);
+            Assert.Equal("123", actual.Address.StreetNumber);
+        }
+
+        [Fact]
+        public void Will__not_replace_name_if_given_default_does_not_support_original_name()
+        {
+            var test = new ReadModelToDataPackMapper(new DefaultNamingMap(new Dictionary<string, HashSet<string>>() { { "default_name", new HashSet<string>() { "replace_1", "replace_2" } } }), Logger);
+            var data = new DataPackReadModel
+            {
+                Carrier = Carrier.DHL,
+                City = "Lippstadt",
+                CountryCode = "DE",
+                DataPackChecked = InfoPackCheckStatus.Unchecked,
+                Id = "4",
+                PostIdent = "1",
+                Street = "not_replaceable 123",
+                ZipCode = "123456"
+            };
+
+            var actual = test.Map(data);
+
+            Assert.Equal("not_replaceable", actual.Address.Street);
+            Assert.Equal("123", actual.Address.StreetNumber);
         }
     }
 }
