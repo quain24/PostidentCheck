@@ -109,7 +109,6 @@ namespace Postident.Infrastructure.Services.DHL
         /// </summary>
         /// <param name="address"></param>
         /// <param name="type"></param>
-        /// <returns></returns>
         private XElement AddressGenerator(Address address, string type)
         {
             var nameSchema = type.Equals("Shipper")
@@ -213,8 +212,7 @@ namespace Postident.Infrastructure.Services.DHL
 
             if (!stringValueTest.Equals(default(KeyValuePair<string, string>)))
             {
-                throw new ArgumentOutOfRangeException(nameof(stringValueTest.Key),
-                    "Given value cannot be null or empty");
+                throw new ArgumentOutOfRangeException(stringValueTest.Key, "Given value cannot be null or empty");
             }
 
             if (amount == 0) throw new ArgumentOutOfRangeException(nameof(amount));

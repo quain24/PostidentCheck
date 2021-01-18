@@ -152,5 +152,31 @@ namespace Postident.Tests.Unit_tests.Infrastructure.Services.DHL
                 }, TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, new List<XElement>());
             });
         }
+
+        [Fact]
+        public void Throws_arg_out_of_range_exc_with_correct_param_name_if_given_empty_string_on_SetExportDocument()
+        {
+            var mocker = new AutoMocker();
+            var builder = mocker.GetMock<ValidationRequestXmlBuilder>();
+
+            var exc = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                var sb = new SingleShipmentBuilder("123", new Address
+                {
+                    City = "a",
+                    CountryCode = "dd",
+                    Name = "a",
+                    PostIdent = "123456",
+                    Street = "a",
+                    StreetNumber = "1",
+                    ZipCode = "12345"
+                }, TestShipmentDefaultValuesFixture.Defaults(), "ns", builder.Object, new List<XElement>());
+
+                sb.SetUpExportDocument("A valid type", "valid export description", "", "valid country code", 10, 10, 10);
+            });
+
+            Output.WriteLine(exc.ToString());
+            Assert.Equal("description", exc.ParamName);
+        }
     }
 }
