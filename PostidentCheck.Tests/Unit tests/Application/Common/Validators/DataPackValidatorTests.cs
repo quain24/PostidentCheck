@@ -40,7 +40,7 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
         }
 
         [Fact]
-        public void Will_return_false_if_email_Is_empty()
+        public void Will_be_valid_if_email_Is_empty()
         {
             var val = new DataPackValidator(new AddressValidator());
             var test = new DataPack()
@@ -59,7 +59,30 @@ namespace Postident.Tests.Unit_tests.Application.Common.Validators
                 Id = "12345"
             };
 
-            Assert.False(val.Validate(test).IsValid);
+            Assert.True(val.Validate(test).IsValid);
+        }
+
+        [Fact]
+        public void Will_be_valid_if_email_Is_null()
+        {
+            var val = new DataPackValidator(new AddressValidator());
+            var test = new DataPack()
+            {
+                Carrier = Carrier.DHL,
+                Address = new Address()
+                {
+                    Street = "Norm strasse",
+                    City = "berlin",
+                    CountryCode = "DE",
+                    PostIdent = "123456789",
+                    ZipCode = "65888"
+                },
+                Email = null,
+                DataPackChecked = InfoPackCheckStatus.Unchecked,
+                Id = "12345"
+            };
+
+            Assert.True(val.Validate(test).IsValid);
         }
 
         [Theory]

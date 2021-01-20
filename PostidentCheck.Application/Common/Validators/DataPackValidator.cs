@@ -1,13 +1,14 @@
-﻿using System.Text.RegularExpressions;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.Results;
 using Postident.Application.Common.Models;
+using System.Text.RegularExpressions;
 
 namespace Postident.Application.Common.Validators
 {
     public class DataPackValidator : AbstractValidator<DataPack>
     {
-        private readonly Regex _emailRegex = new (@"^[\w!#$%&'*+\-/=?\^_`{|}~]+(\.[\w!#$%&'*+\-/=?\^_`{|}~]+)*@((([\-\w]+\.)+[a-zA-Z]{2,7})|(([0-9]{1,3}\.){3}[0-9]{1,3}))\z$");
+        private readonly Regex _emailRegex = new(@"^[\w!#$%&'*+\-/=?\^_`{|}~]+(\.[\w!#$%&'*+\-/=?\^_`{|}~]+)*@((([\-\w]+\.)+[a-zA-Z]{2,7})|(([0-9]{1,3}\.){3}[0-9]{1,3}))\z$");
+
         public DataPackValidator(IValidator<Address> addressValidator)
         {
             RuleFor(d => d.Id)
@@ -16,11 +17,12 @@ namespace Postident.Application.Common.Validators
                 .WithErrorCode("id_missing")
                 .WithMessage("ID missing!");
 
-            RuleFor(d => d.Email)
-                .NotEmpty()
-                .WithMessage(d => $"ID {d.Id}: E-Mail address is missing.")
-                .Matches(_emailRegex)
-                .WithMessage(d => $"ID {d.Id}: E-Mail address ({d.Email}) is not valid.");
+            When(d => string.IsNullOrEmpty(d.Email) is false, () =>
+            {
+                RuleFor(d => d.Email)
+                    .Matches(_emailRegex)
+                    .WithMessage(d => $"ID {d.Id}: E-Mail address ({d.Email}) is not valid.");
+            });
 
             RuleFor(d => d.DataPackChecked)
                 .IsInEnum()
