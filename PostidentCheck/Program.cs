@@ -54,13 +54,17 @@ namespace PostidentCheck
 
         private static void BuildConfig(IConfigurationBuilder builder)
         {
+            var pcWideAppsettingsLocation = $"{Environment.GetEnvironmentVariable("APPSETT_FILE_LOCATION")}\\";
+            var currentEnvAppSettingsFileName = $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIROMENT") ?? "Production"}.json";
+
             builder.SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIROMENT") ?? "Production"}.json", optional: true)
+                .AddJsonFile(pcWideAppsettingsLocation + currentEnvAppSettingsFileName, optional: true)
+                .AddJsonFile(currentEnvAppSettingsFileName, optional: true)
                 .AddJsonFile("Common/DefaultShipmentValues.json", optional: false, reloadOnChange: true)
                 .AddJsonFile("Common/DefaultNamingMap.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables()
-                .AddUserSecrets(typeof(Program).Assembly);
+                .AddUserSecrets(typeof(Program).Assembly, optional: true);
         }
     }
 }
