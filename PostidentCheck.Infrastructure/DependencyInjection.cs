@@ -10,7 +10,7 @@ namespace Postident.Infrastructure
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration config)
         {
             services
-                .SetupDatabaseAccess(config.GetConnectionString("DilosDEV"))
+                .SetupDatabaseAccess(config.GetConnectionString("MainConStr"))
                 .SetupDHLServices(config)
                 .SetupCommonDependencies(config)
                 .SetupKeePassServices(config);
