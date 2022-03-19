@@ -26,7 +26,7 @@ Data will be validated offline and online, you will get a status (valid / not ch
 Those settings are commonly adjustable, rest should mostly be left alone - the do not need to be changed basically ever.
 
 ### Appsettings.json:
-* DilosDEV - main connection string
+* MainConStr - main connection string
 * DHL
     * BaseAddress - main url to soap service of dhl
     * Secret - KeePass guid for http client authorization data
